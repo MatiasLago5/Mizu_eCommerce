@@ -1,0 +1,70 @@
+/* Contenedor principal */
+.featured-products {
+  text-align: center;
+  padding: 3rem 2rem;
+  
+  background-color: rgb(255, 255, 255);
+  font-family: 'Helvetica Neue', 'Noto Sans JP', sans-serif;
+}
+
+/* Título de la sección */
+.featured-title {
+  font-size: 2rem;
+  color: #0d3b66; /* azul profundo */
+  margin-bottom: 2rem;
+  letter-spacing: 0.05em;
+}
+
+/* Grid de productos */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Cada card de producto */
+.product-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Efecto hover */
+.product-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(13, 59, 102, 0.2); /* azul para hover */
+}
+
+/* Imagen del producto */
+.product-image {
+  width: 100%;
+  height: 200px;
+  object-fit: contain;
+  border-radius: 8px;
+  margin-bottom: 0.8rem;
+}
+
+/* Nombre del producto */
+.product-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0.3rem 0;
+  color: #0d3b66; /* azul profundo */
+}
+
+/* Precio del producto */
+.product-price {
+  font-size: 1rem;
+  color: #1a73e8; /* azul suave estilo agua */
+  font-weight: 500;
+}
+
+/* Texto de carga */
+.loading-text {
+  text-align: center;
+  color: #1a73e8;
+  font-size: 1.2rem;
+  margin-top: 2rem;
+}

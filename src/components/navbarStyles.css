@@ -1,0 +1,154 @@
+/* navbarStyles.css */
+
+.navbar {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-content {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 2rem;
+  gap: 2rem;
+  width: 100%;
+}
+
+/* Logo/Brand - CENTRO */
+.navbar-brand {
+  font-size: 1.75rem;
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  color: #1a1a1a;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.navbar-brand:hover {
+  color: #6B9BD1;
+}
+
+.kanji {
+  font-size: 1.25rem;
+  color: #6B9BD1;
+  opacity: 0.9;
+}
+
+/* Links de navegación - IZQUIERDA */
+.navbar-links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.nav-link {
+  color: #4B5563;
+  text-decoration: none;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  padding: 0.5rem 0;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #6B9BD1;
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #1a1a1a;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Iconos de acción - DERECHA */
+.navbar-actions {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.nav-icon {
+  color: #4B5563;
+  text-decoration: none;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.nav-icon:hover {
+  color: #6B9BD1;
+  background-color: rgba(107, 155, 209, 0.1);
+}
+
+/* Badge del carrito */
+.cart-icon {
+  position: relative;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: #6B9BD1;
+  color: white;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .navbar-links {
+    display: none;
+  }
+  
+  .navbar-content {
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-content {
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+
+  .navbar-actions {
+    gap: 1rem;
+  }
+
+  .navbar-brand {
+    font-size: 1.5rem;
+  }
+}

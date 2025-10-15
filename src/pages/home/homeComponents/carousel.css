@@ -1,0 +1,158 @@
+/* carousel.css */
+
+.carousel {
+  width: 100%;
+  height: 300px;
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.slide-content {
+  position: relative;
+  width: 100%;
+  height: 300px;  /* ← Cambié de 200px a 300px para que coincida */
+}
+
+.slide-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slide-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  display: flex;
+  align-items: center;
+  padding: 0 5%;
+}
+
+.slide-text {
+  max-width: 600px;
+  color: white;
+  animation: slideIn 0.8s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-title {
+  font-size: 3.5rem;
+  font-weight: 300;
+  margin-bottom: 1rem;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+.slide-subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  font-weight: 300;
+  opacity: 0.95;
+}
+
+.slide-cta {
+  background-color: white;
+  color: #1a1a1a;
+  border: none;
+  padding: 1rem 3rem;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.slide-cta:hover {
+  background-color: #6B9BD1;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos personalizados de navegación */
+.carousel-swiper .swiper-button-next,
+.carousel-swiper .swiper-button-prev {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.2);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.carousel-swiper .swiper-button-next:hover,
+.carousel-swiper .swiper-button-prev:hover {
+  background-color: rgba(107, 155, 209, 0.8);
+}
+
+.carousel-swiper .swiper-button-next::after,
+.carousel-swiper .swiper-button-prev::after {
+  font-size: 20px;
+}
+
+/* Estilos de paginación */
+.carousel-swiper .swiper-pagination-bullet {
+  background-color: white;
+  opacity: 0.5;
+  width: 12px;
+  height: 12px;
+}
+
+.carousel-swiper .swiper-pagination-bullet-active {
+  background-color: #6B9BD1;
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .carousel {
+    height: 400px;
+  }
+
+  .slide-content {
+    height: 400px;
+  }
+
+  .slide-title {
+    font-size: 2rem;
+  }
+
+  .slide-subtitle {
+    font-size: 1rem;
+  }
+
+  .slide-cta {
+    padding: 0.75rem 2rem;
+    font-size: 0.9rem;
+  }
+
+  .carousel-swiper .swiper-button-next,
+  .carousel-swiper .swiper-button-prev {
+    width: 40px;
+    height: 40px;
+  }
+}

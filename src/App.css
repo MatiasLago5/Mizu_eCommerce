@@ -1,0 +1,12 @@
+/* Minimal component styles for blank UI */
+
+.app-root {
+  width: 100%;
+}
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 24px;
+}
+
