@@ -3,7 +3,7 @@ import CountUp from "react-countup";
 import "./SalesCounter.css";
 
 const SalesCounter = () => {
-  const totalVentas = 120; // <-- Cambiá este valor por tus ventas reales
+  const totalVentas = 120; // <-- Numero de ventas
   const productosDonados = Math.floor(totalVentas / 3);
 
   return (

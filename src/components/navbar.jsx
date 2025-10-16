@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { Filter, Search, ShoppingCart, User } from 'lucide-react';
+import { Link } from "react-router-dom";
+import { Filter, Search, ShoppingCart, User } from "lucide-react";
 import "./navbarStyles.css";
 
 function NavBar() {
@@ -7,7 +7,7 @@ function NavBar() {
     <nav className="navbar">
       <div className="container-fluid">
         <div className="navbar-content">
-          {/* Links de navegación - IZQUIERDA */}
+          {/* IZQUIERDA */}
           <div className="navbar-links">
             <Link to="/" className="nav-link">
               Home
@@ -23,13 +23,13 @@ function NavBar() {
             </Link>
           </div>
 
-          {/* Logo/Título - CENTRO */}
+          {/* CENTRO */}
           <Link to="/" className="navbar-brand">
             MIZU
             <span className="kanji">水</span>
           </Link>
 
-          {/* Iconos de acción - DERECHA */}
+          {/* DERECHA */}
           <div className="navbar-actions">
             <Link to="/filtro" className="nav-icon" title="Filtrar">
               <Filter size={20} />
@@ -39,7 +39,7 @@ function NavBar() {
             </Link>
             <Link to="/carrito" className="nav-icon cart-icon" title="Carrito">
               <ShoppingCart size={20} />
-              <span className="cart-badge">3</span>
+              <span className="cart-badge">0</span>
             </Link>
             <Link to="/login" className="nav-icon" title="Login">
               <User size={20} />

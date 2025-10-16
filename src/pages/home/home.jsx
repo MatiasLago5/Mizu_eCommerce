@@ -1,25 +1,22 @@
-import HeroCarousel from './homeComponents/carousel';
-import './homeStyles.css';
-import SalesCounter from './homeComponents/salesCounter';
-import FeaturedProducts from './homeComponents/featuredProducts';
+import HeroCarousel from "./homeComponents/carousel";
+import "./homeStyles.css";
+import SalesCounter from "./homeComponents/salesCounter";
+import FeaturedProducts from "./homeComponents/featuredProducts";
 
 function Home() {
   return (
     <div className="home-container">
-      {/* Carousel Hero */}
+      {/* Carousel */}
       <HeroCarousel />
-      
+
       {/* Sección de bienvenida */}
       <section className="welcome-section">
-        <h1 className="welcome-title">
-          Bienvenido a Mizu 水
-        </h1>
-      
+        <h1 className="welcome-title">Bienvenido a Mizu 水</h1>
       </section>
 
-      {/* Aquí irán los otros componentes */}
-      {/* {<SalesCounter /> } */}
-      { <FeaturedProducts /> }
+      {/* Aca van los otros componentes */}
+      {<SalesCounter />}
+      {<FeaturedProducts />}
     </div>
   );
 }
