@@ -22,23 +22,9 @@ function Footer() {
             </li>
             <li>
               <Link to="/higienedental" className="footer-link">
-                Higiene dental
+                categorias
               </Link>
-            </li>
-            <li>
-              <Link to="/cuidadocorporal" className="footer-link">
-                Cuidado corporal
-              </Link>
-            </li>
-            <li>
-              <Link to="/skincare" className="footer-link">
-                Skin care
-              </Link>
-            </li>
-            <li>
-              <Link to="/capilar" className="footer-link">
-                Capilar
-              </Link>
+            
             </li>
           </ul>
         </div>
@@ -73,7 +59,7 @@ function Footer() {
               hola@mizu.com
             </a>
             <a href="tel:+34123456789" className="footer-contact-item">
-              +34 123 456 789
+              091123456
             </a>
           </div>
         </div>
