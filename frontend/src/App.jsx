@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Home from "./pages/home/home";
 import Login from "./pages/login/login";
 import Signup from "./pages/login/signup";
@@ -9,7 +9,7 @@ import ProductDetail from "./pages/products/productDetail";
 
 function App() {
   return (
-    <BrowserRouter>
+    <>
       <NavBar />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -19,7 +19,7 @@ function App() {
         <Route path="/producto/:id" element={<ProductDetail />} />
       </Routes>
       <Footer />
-    </BrowserRouter>
+    </>
   );
 }
 

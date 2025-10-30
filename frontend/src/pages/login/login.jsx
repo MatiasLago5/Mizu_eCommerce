@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './loginStyles.css';
+import { loginUser, saveAuthToken } from '../../apiFetchs/usersFetch';
 
 function Login() {
   const navigate = useNavigate();
@@ -55,15 +56,17 @@ function Login() {
     setIsLoading(true);
 
     try {
-      // TODO: Aca va la llamada a la API
-      // const response = await loginService(formData);
-      
-      // Simulación temporal
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      console.log('Login exitoso:', formData);
-      // navigate('/'); // Redireccionar al home
-      alert('Login exitoso! (temporal)');
+      const payload = await loginUser({
+        email: formData.email.trim(),
+        password: formData.password,
+      });
+
+      if (payload.token) {
+        saveAuthToken(payload.token);
+      }
+
+      navigate('/');
+      console.log('Login exitoso:', payload);
       
     } catch (error) {
       setErrors({ general: 'Error al iniciar sesión. Verifica tus credenciales.' });

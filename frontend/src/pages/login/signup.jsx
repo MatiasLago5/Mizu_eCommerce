@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './loginStyles.css';
+import { registerUser, saveAuthToken } from '../../apiFetchs/usersFetch';
 
 function Signup() {
   const navigate = useNavigate();
@@ -69,23 +70,25 @@ function Signup() {
     if (!validateForm()) return;
 
     setIsLoading(true);
-
     try {
-      // TODO: Aca va la llamada a la API
-      // const response = await signupService(formData);
-      
-      // Simulación temporal
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      console.log('Registro exitoso:', formData);
-      // navigate('/login'); // Redireccionar al login después del registro
-      alert('¡Registro exitoso! (temporal)');
-      
+      const payload = await registerUser({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+      });
+
+      if (payload.token) {
+        saveAuthToken(payload.token);
+      }
+
+      navigate('/');
+      console.log('Registro exitoso:', payload);
     } catch (error) {
-      setErrors({ general: 'Error al registrarse. Por favor, intenta nuevamente.' });
+      setErrors({ general: error?.message || 'Error al registrarse. Por favor, intenta nuevamente.' });
     } finally {
       setIsLoading(false);
     }
+
   };
 
   return (
