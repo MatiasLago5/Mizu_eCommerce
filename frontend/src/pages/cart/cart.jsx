@@ -97,7 +97,6 @@ function Cart() {
   return (
     <div className="cart-container">
       <div className="cart-content">
-        {/* Header */}
         <div className="cart-header">
           <h1 className="cart-title">Tu Carrito</h1>
           <p className="cart-subtitle">{cartItems.length} productos</p>
@@ -110,7 +109,6 @@ function Cart() {
             <div className="cart-loading">Cargando carrito...</div>
           ) : null}
 
-          {/* Lista de productos */}
           <div className="cart-items-section">
             {cartItems.length === 0 ? (
               <div className="empty-cart">
@@ -188,12 +186,10 @@ function Cart() {
             )}
           </div>
 
-          {/* Resumen */}
           {cartItems.length > 0 && (
             <div className="cart-summary">
               <h2 className="summary-title">Resumen</h2>
 
-              {/* Donaciones */}
               {donations > 0 && (
                 <div className="donation-banner">
                   <div className="donation-icon">💝</div>

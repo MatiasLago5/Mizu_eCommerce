@@ -20,7 +20,6 @@ function Signup() {
       ...prev,
       [name]: value
     }));
-    // Limpiar error del campo al escribir
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -31,29 +30,25 @@ function Signup() {
 
   const validateForm = () => {
     const newErrors = {};
-
-    // Validar nombre
     if (!formData.name.trim()) {
       newErrors.name = 'El nombre es requerido';
-    } else if (formData.name.trim().length < 2) {
+    }
+     else if (formData.name.trim().length < 2) {
       newErrors.name = 'El nombre debe tener al menos 2 caracteres';
     }
 
-    // Validar email
     if (!formData.email) {
       newErrors.email = 'El email es requerido';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email inválido';
     }
 
-    // Validar password
     if (!formData.password) {
       newErrors.password = 'La contraseña es requerida';
     } else if (formData.password.length < 6) {
       newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
     }
 
-    // Validar confirmación de password
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Debes confirmar tu contraseña';
     } else if (formData.password !== formData.confirmPassword) {
@@ -94,7 +89,6 @@ function Signup() {
   return (
     <div className="login-container">
       <div className="login-card">
-        {/* Logo/Título */}
         <div className="login-header">
           <h1 className="login-title">
             MIZU
@@ -102,16 +96,13 @@ function Signup() {
           <p className="login-subtitle">Crea tu cuenta</p>
         </div>
 
-        {/* Formulario */}
         <form onSubmit={handleSubmit} className="login-form">
-          {/* Error general */}
           {errors.general && (
             <div className="error-message general-error">
               {errors.general}
             </div>
           )}
 
-          {/* Campo Nombre */}
           <div className="form-group">
             <label htmlFor="name" className="form-label">
               Nombre completo
@@ -131,7 +122,6 @@ function Signup() {
             )}
           </div>
 
-          {/* Campo Email */}
           <div className="form-group">
             <label htmlFor="email" className="form-label">
               Email
@@ -151,7 +141,6 @@ function Signup() {
             )}
           </div>
 
-          {/* Campo Dirección */}
           <div className="form-group">
             <label htmlFor="address" className="form-label">
               Dirección
@@ -171,7 +160,6 @@ function Signup() {
             )}
           </div>
 
-          {/* Campo Teléfono */}
           <div className="form-group">
             <label htmlFor="phoneNumber" className="form-label">
               Teléfono
@@ -191,7 +179,6 @@ function Signup() {
             )}
           </div>
 
-          {/* Campo Password */}
           <div className="form-group">
             <label htmlFor="password" className="form-label">
               Contraseña
@@ -211,7 +198,6 @@ function Signup() {
             )}
           </div>
 
-          {/* Campo Confirmar Password */}
           <div className="form-group">
             <label htmlFor="confirmPassword" className="form-label">
               Confirmar contraseña
@@ -231,7 +217,6 @@ function Signup() {
             )}
           </div>
 
-          {/* Botón Submit */}
           <button 
             type="submit" 
             className="btn-submit"
@@ -240,7 +225,6 @@ function Signup() {
             {isLoading ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>
 
-          {/* Link a login */}
           <div className="register-link">
             <span>¿Ya tienes cuenta? </span>
             <a href="/login">Inicia sesión aquí</a>
