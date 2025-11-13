@@ -1,112 +1,193 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import "./productDetailStyles.css";
+import { fetchProductById } from "../../apiFetchs/productsFetch";
+import { addOrUpdateCartItem } from "../../apiFetchs/cartFetch";
 
 function ProductDetail() {
-  // Datos de ejemplo (mock data)
-  const product = {
-    id: 1,
-    name: "Mizu Pure Flow",
-    category: "Jabones Líquidos",
-    price: 12.99,
-    description:
-      "Jabón líquido suave y purificante para uso diario. Formulado con ingredientes naturales que limpian delicadamente sin resecar la piel. Su textura ligera y aromática transforma cada lavado en un momento de calma y frescura.",
-    ingredients: "Agua purificada, glicerina vegetal, aceite de coco, extracto de aloe vera, aceites esenciales naturales.",
-    sizes: ["250ml", "500ml", "1L"],
-    images: [
-      "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=600",
-      "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=600",
-      "https://images.unsplash.com/photo-1585933646077-214581db4821?w=600",
-    ],
-    stock: 50,
+  const { id } = useParams();
+
+  const [product, setProduct] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [feedback, setFeedback] = useState(null);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadProduct = async () => {
+      if (!id) {
+        setError("Producto no especificado");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setError(null);
+        setLoading(true);
+        const data = await fetchProductById(id);
+        if (!isActive) return;
+        setProduct(data);
+        setSelectedImage(0);
+        setQuantity(1);
+      } catch (err) {
+        if (!isActive) return;
+        setProduct(null);
+        setError(err?.message ?? "Error al cargar el producto");
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadProduct();
+
+    return () => {
+      isActive = false;
+    };
+  }, [id]);
+
+  const gallery = useMemo(() => {
+    if (!product) return [];
+    if (Array.isArray(product.images) && product.images.length > 0) {
+      return product.images;
+    }
+    if (product.imageUrl) {
+      return [product.imageUrl];
+    }
+    return [];
+  }, [product]);
+
+  useEffect(() => {
+    if (selectedImage >= gallery.length) {
+      setSelectedImage(0);
+    }
+  }, [gallery, selectedImage]);
+
+  const stockNumber = useMemo(() => {
+    const numeric = Number(product?.stock ?? 0);
+    return Number.isFinite(numeric) ? numeric : 0;
+  }, [product]);
+
+  const priceNumber = useMemo(() => {
+    const numeric = Number(product?.price ?? 0);
+    return Number.isFinite(numeric) ? numeric : null;
+  }, [product]);
+
+  const handleQuantityChange = (delta) => {
+    const next = quantity + delta;
+    if (next < 1) return;
+    if (stockNumber > 0 && next > stockNumber) return;
+    setQuantity(next);
   };
 
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
-  const [quantity, setQuantity] = useState(1);
+  const handleAddToCart = async () => {
+    if (!product?.id) return;
 
-  const handleQuantityChange = (value) => {
-    const newQuantity = quantity + value;
-    if (newQuantity >= 1 && newQuantity <= product.stock) {
-      setQuantity(newQuantity);
+    try {
+      setFeedback(null);
+      await addOrUpdateCartItem({
+        productId: product.id,
+        quantity,
+      });
+      setFeedback({
+        type: "success",
+        message: "Producto agregado al carrito",
+      });
+    } catch (err) {
+      setFeedback({
+        type: "error",
+        message: err?.message ?? "No se pudo agregar al carrito",
+      });
     }
   };
 
-  const handleAddToCart = () => {
-    console.log("Añadido al carrito:", {
-      product: product.name,
-      size: selectedSize,
-      quantity: quantity,
-    });
-    // Aquí conectarás con tu estado global o context del carrito
-  };
+  const mainImage = gallery[selectedImage] || "/placeholder.png";
+  const categoryName = product?.category?.name || product?.category || "";
+  const subcategoryName = product?.subcategory?.name || "";
+  const isOutOfStock = stockNumber <= 0;
+
+  if (loading) {
+    return (
+      <div className="product-detail-container">
+        <div className="product-detail-content">
+          <div className="product-status">Cargando producto...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="product-detail-container">
+        <div className="product-detail-content">
+          <div className="product-status product-status-error">{error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="product-detail-container">
       <div className="product-detail-content">
-        {/* SECCIÓN IZQUIERDA: IMÁGENES */}
         <div className="product-images-section">
           <div className="main-image-container">
             <img
-              src={product.images[selectedImage]}
-              alt={product.name}
+              src={mainImage}
+              alt={product?.name || "Producto"}
               className="main-image"
             />
           </div>
-          <div className="thumbnails-container">
-            {product.images.map((image, index) => (
-              <button
-                key={index}
-                className={`thumbnail ${
-                  selectedImage === index ? "active" : ""
-                }`}
-                onClick={() => setSelectedImage(index)}
-              >
-                <img src={image} alt={`${product.name} ${index + 1}`} />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* SECCIÓN DERECHA: INFORMACIÓN */}
-        <div className="product-info-section">
-          <div className="product-category">{product.category}</div>
-          <h1 className="product-name">{product.name}</h1>
-          <div className="product-price">{product.price.toFixed(2)} €</div>
-
-          <div className="product-description">
-            <p>{product.description}</p>
-          </div>
-
-          <div className="product-ingredients">
-            <h3>Ingredientes</h3>
-            <p>{product.ingredients}</p>
-          </div>
-
-          {/* SELECTOR DE TAMAÑO */}
-          <div className="product-options">
-            <label className="option-label">Tamaño</label>
-            <div className="size-selector">
-              {product.sizes.map((size) => (
+          {gallery.length > 1 && (
+            <div className="thumbnails-container">
+              {gallery.map((image, index) => (
                 <button
-                  key={size}
-                  className={`size-button ${
-                    selectedSize === size ? "active" : ""
+                  key={index}
+                  className={`thumbnail ${
+                    selectedImage === index ? "active" : ""
                   }`}
-                  onClick={() => setSelectedSize(size)}
+                  onClick={() => setSelectedImage(index)}
                 >
-                  {size}
+                  <img
+                    src={image}
+                    alt={`${product?.name || "Producto"} ${index + 1}`}
+                  />
                 </button>
               ))}
             </div>
+          )}
+        </div>
+
+        <div className="product-info-section">
+          {(categoryName || subcategoryName) && (
+            <div className="product-category">
+              {categoryName}
+              {subcategoryName ? ` • ${subcategoryName}` : ""}
+            </div>
+          )}
+          <h1 className="product-name">{product?.name}</h1>
+          <div className="product-price">
+            {priceNumber !== null
+              ? `$${priceNumber.toFixed(2)}`
+              : product?.price}
           </div>
 
-          {/* SELECTOR DE CANTIDAD */}
+          {product?.description && (
+            <div className="product-description">
+              <p>{product.description}</p>
+            </div>
+          )}
+
           <div className="product-options">
             <label className="option-label">Cantidad</label>
             <div className="quantity-selector">
               <button
                 className="quantity-button"
                 onClick={() => handleQuantityChange(-1)}
+                disabled={quantity <= 1}
               >
                 −
               </button>
@@ -114,23 +195,42 @@ function ProductDetail() {
               <button
                 className="quantity-button"
                 onClick={() => handleQuantityChange(1)}
+                disabled={
+                  isOutOfStock || (stockNumber > 0 && quantity >= stockNumber)
+                }
               >
                 +
               </button>
             </div>
           </div>
 
-          {/* BOTÓN AÑADIR AL CARRITO */}
-          <button className="add-to-cart-button" onClick={handleAddToCart}>
-            Añadir a la cesta
+          <button
+            className="add-to-cart-button"
+            onClick={handleAddToCart}
+            disabled={isOutOfStock}
+          >
+            {isOutOfStock ? "Sin stock" : "Añadir al carrito"}
           </button>
 
-          {/* STOCK */}
           <div className="product-stock">
-            {product.stock > 10
+            {isOutOfStock
+              ? "No hay stock disponible"
+              : stockNumber > 10
               ? "En stock"
-              : `Solo quedan ${product.stock} unidades`}
+              : `Solo quedan ${stockNumber} unidades`}
           </div>
+
+          {feedback && (
+            <div
+              className={`product-feedback ${
+                feedback.type === "error"
+                  ? "product-feedback-error"
+                  : "product-feedback-success"
+              }`}
+            >
+              {feedback.message}
+            </div>
+          )}
         </div>
       </div>
     </div>

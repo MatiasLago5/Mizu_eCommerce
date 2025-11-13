@@ -239,6 +239,35 @@
   font-size: 0.9rem;
 }
 
+.product-status {
+  font-size: 1.1rem;
+  color: #4b5563;
+  padding: 3rem 0;
+  text-align: center;
+}
+
+.product-status-error {
+  color: #b91c1c;
+}
+
+.product-feedback {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.product-feedback-success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.product-feedback-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
 /* RESPONSIVE */
 @media (max-width: 992px) {
   .product-detail-content {
