@@ -41,5 +41,5 @@ module.exports = async () => {
 
   await User.destroy({ where: {} });
   await User.bulkCreate(users, { individualHooks: true });
-  console.log("[Database] Se corrió el seeder de Users.");
+  console.log("Se corrió el seeder de Users");
 };

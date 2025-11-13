@@ -22,7 +22,6 @@ async function getCart(req, res) {
       ],
     });
 
-    // Si no existe carrito, crear uno nuevo
     if (!cart) {
       cart = await Cart.create({ userId });
       cart.items = [];
@@ -47,7 +46,6 @@ async function getCart(req, res) {
   }
 }
 
-// Agregar producto al carrito
 async function addItem(req, res) {
   try {
     const userId = req.user.id;
@@ -65,7 +63,6 @@ async function addItem(req, res) {
       });
     }
 
-    // Verificar que el producto existe y está activo
     const product = await Product.findByPk(productId);
     if (!product) {
       return res.status(404).json({
@@ -86,13 +83,11 @@ async function addItem(req, res) {
       });
     }
 
-    // Obtener o crear carrito
     let cart = await Cart.findOne({ where: { userId } });
     if (!cart) {
       cart = await Cart.create({ userId });
     }
 
-    // Verificar si el item ya existe en el carrito
     let cartItem = await CartItem.findOne({
       where: {
         cartId: cart.id,
@@ -101,7 +96,6 @@ async function addItem(req, res) {
     });
 
     if (cartItem) {
-      // Actualizar cantidad
       const newQuantity = cartItem.quantity + quantity;
       
       if (product.stock < newQuantity) {
@@ -113,7 +107,6 @@ async function addItem(req, res) {
       cartItem.quantity = newQuantity;
       await cartItem.save();
     } else {
-      // Crear nuevo item
       cartItem = await CartItem.create({
         cartId: cart.id,
         productId,
@@ -122,7 +115,6 @@ async function addItem(req, res) {
       });
     }
 
-    // Obtener el item con el producto incluido
     const updatedItem = await CartItem.findByPk(cartItem.id, {
       include: [
         {
@@ -145,7 +137,6 @@ async function addItem(req, res) {
   }
 }
 
-// Actualizar cantidad de un item del carrito
 async function updateItem(req, res) {
   try {
     const userId = req.user.id;
@@ -158,7 +149,6 @@ async function updateItem(req, res) {
       });
     }
 
-    // Obtener el carrito del usuario
     const cart = await Cart.findOne({ where: { userId } });
     if (!cart) {
       return res.status(404).json({
@@ -166,7 +156,6 @@ async function updateItem(req, res) {
       });
     }
 
-    // Obtener el item
     const cartItem = await CartItem.findOne({
       where: {
         id: itemId,
@@ -186,14 +175,12 @@ async function updateItem(req, res) {
       });
     }
 
-    // Verificar stock
     if (cartItem.product.stock < quantity) {
       return res.status(400).json({
         error: `Stock insuficiente. Disponible: ${cartItem.product.stock}`,
       });
     }
 
-    // Actualizar cantidad
     cartItem.quantity = quantity;
     await cartItem.save();
 
@@ -209,13 +196,11 @@ async function updateItem(req, res) {
   }
 }
 
-// Eliminar item del carrito
 async function removeItem(req, res) {
   try {
     const userId = req.user.id;
     const { itemId } = req.params;
 
-    // Obtener el carrito del usuario
     const cart = await Cart.findOne({ where: { userId } });
     if (!cart) {
       return res.status(404).json({
@@ -223,7 +208,6 @@ async function removeItem(req, res) {
       });
     }
 
-    // Obtener el item
     const cartItem = await CartItem.findOne({
       where: {
         id: itemId,
@@ -250,7 +234,6 @@ async function removeItem(req, res) {
   }
 }
 
-// Vaciar carrito
 async function clearCart(req, res) {
   try {
     const userId = req.user.id;

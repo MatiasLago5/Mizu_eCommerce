@@ -3,9 +3,9 @@ const router = express.Router();
 const cartController = require("../controllers/cartController");
 const auth = require("../middleware/auth");
 
-// Todas las rutas del carrito requieren autenticación
 router.use(auth);
 
+// Rutas para el carrito de compras
 // Obtener carrito del usuario
 router.get("/", cartController.getCart);
 
