@@ -64,7 +64,7 @@ body {
   font-weight: 300;
   letter-spacing: 0.15em;
   margin: 0;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 2px 10px rgba(255, 252, 252, 0.7);
 }
 
 .about-tagline {
@@ -72,7 +72,7 @@ body {
   margin-top: 1rem;
   font-weight: 300;
   letter-spacing: 0.05em;
-  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 2px 5px rgba(255, 255, 255, 0.7);
 }
 
 .parallax-title {
@@ -80,7 +80,7 @@ body {
   font-weight: 300;
   letter-spacing: 0.08em;
   margin: 0;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.7);
 }
 
 /* Secciones de contenido */
@@ -106,7 +106,7 @@ body {
 .section-title {
   font-size: 1.75rem;
   font-weight: 400;
-  color: #1a1a1a;
+  color: #ffffff;
   margin: 0 0 1.5rem 0;
   letter-spacing: 0.03em;
   text-align: center;
@@ -141,22 +141,23 @@ body {
 }
 
 .card-text {
-  color: #4b5563;
+  color: #000000;
   font-size: 0.95rem;
   line-height: 1.7;
   font-weight: 300;
   letter-spacing: 0.02em;
 }
 
+
 /* Valores Grid */
 .values-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
   gap: 2rem;
   margin-top: 1rem;
 }
 
 .value-item {
+  flex: 1;
   text-align: center;
 }
 
@@ -181,13 +182,20 @@ body {
   font-weight: 300;
 }
 
+/* Responsive */
+@media (max-width: 768px) {
+  .values-grid {
+    flex-direction: column;
+  }
+}
+
 /* CTA en parallax final */
 .cta-title {
   font-size: 2rem;
   font-weight: 400;
   margin: 0 0 1rem 0;
   letter-spacing: 0.03em;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.7);
 }
 
 .cta-text {
