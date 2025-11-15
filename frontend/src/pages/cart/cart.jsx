@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom"; // ⬅️ AÑADIDO
 import "./cartStyles.css";
 import {
   fetchCart,
@@ -10,6 +11,8 @@ function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const navigate = useNavigate(); // ⬅️ AÑADIDO
 
   const loadCart = useCallback(async () => {
     try {
@@ -117,7 +120,14 @@ function Cart() {
                 <p className="empty-text">
                   Agregá productos para comenzar tu compra
                 </p>
-                <button className="btn-shop">Ir a productos</button>
+
+                {/* ⬅️ BOTÓN ACTUALIZADO */}
+                <button
+                  className="btn-shop"
+                  onClick={() => navigate("/productos")}
+                >
+                  Ir a productos
+                </button>
               </div>
             ) : (
               <div className="cart-items-list">

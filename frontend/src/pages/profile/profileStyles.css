@@ -1,0 +1,503 @@
+.profile-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%);
+  padding: 3rem 2rem;
+}
+
+.profile-content {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Header */
+.profile-header {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  padding: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #6B9BD1 0%, #4a7ba8 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-text {
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: white;
+  letter-spacing: 0.05em;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 2rem;
+  font-weight: 400;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: 0.03em;
+}
+
+.profile-email {
+  color: #6b7280;
+  font-size: 1rem;
+  font-weight: 300;
+  margin: 0;
+}
+
+/* Tabs */
+.profile-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.tab {
+  padding: 0.875rem 1.5rem;
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  color: #6b7280;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  border-color: #6B9BD1;
+  color: #6B9BD1;
+}
+
+.tab.active {
+  background: #6B9BD1;
+  border-color: #6B9BD1;
+  color: white;
+}
+
+/* Tab Content */
+.tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Section Card */
+.section-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  padding: 2.5rem;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #1a1a1a;
+  margin: 0;
+  letter-spacing: 0.03em;
+}
+
+/* Form Fields */
+.form-grid {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field-label {
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.field-value {
+  color: #1a1a1a;
+  font-size: 1rem;
+  font-weight: 400;
+  margin: 0;
+  padding: 0.75rem 0;
+}
+
+.field-input {
+  padding: 0.875rem 1rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+  color: #1a1a1a;
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: #6B9BD1;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(107, 155, 209, 0.1);
+}
+
+/* Buttons */
+.btn-edit,
+.btn-add {
+  background: transparent;
+  color: #6B9BD1;
+  border: 1.5px solid #6B9BD1;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-edit:hover,
+.btn-add:hover {
+  background: #f0f5f9;
+}
+
+.btn-primary {
+  background-color: #6B9BD1;
+  color: white;
+  padding: 0.875rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.btn-primary:hover {
+  background-color: #4a7ba8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(107, 155, 209, 0.3);
+}
+
+.btn-logout {
+  background: transparent;
+  color: #ef4444;
+  border: 1.5px solid #ef4444;
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.btn-logout:hover {
+  background: #fef2f2;
+}
+
+/* Orders */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.order-card {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.order-id {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin: 0 0 0.25rem 0;
+}
+
+.order-date {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.order-status {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.item-detail {
+  color: #4b5563;
+}
+
+.item-price {
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-total-label {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.order-total {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #6B9BD1;
+}
+
+/* Addresses */
+.address-form {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 0.75rem;
+  background: transparent;
+  color: #6b7280;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+  background: #f3f4f6;
+}
+
+.btn-save {
+  flex: 1;
+  padding: 0.75rem;
+  background: #6B9BD1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-save:hover {
+  background: #4a7ba8;
+}
+
+.addresses-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.address-card {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.address-info {
+  flex: 1;
+}
+
+.address-label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.default-badge {
+  background: #6B9BD1;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.address-detail {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+}
+
+.btn-delete {
+  background: transparent;
+  color: #ef4444;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-delete:hover {
+  color: #dc2626;
+  text-decoration: underline;
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 2rem 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 2rem 1rem;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .avatar-text {
+    font-size: 2rem;
+  }
+
+  .profile-name {
+    font-size: 1.75rem;
+  }
+
+  .profile-tabs {
+    gap: 0.25rem;
+  }
+
+  .tab {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .section-card {
+    padding: 1.5rem;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .order-card,
+  .address-card {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-name {
+    font-size: 1.5rem;
+  }
+
+  .card-title {
+    font-size: 1.25rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}

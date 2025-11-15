@@ -9,6 +9,9 @@ import ProductDetail from "./pages/products/productDetail";
 import AboutUs from "./pages/aboutUs/aboutUs";
 import Donations from "./pages/donations/donations";
 import Cart from "./pages/cart/cart";
+import Profile from "./pages/profile/profile";
+import Admin from "./pages/admin/admin";
+
 
 function App() {
   return (
@@ -20,9 +23,11 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/productos" element={<Products />} />
         <Route path="/producto/:id" element={<ProductDetail />} />
-        <Route path="/about-us" element={<AboutUs />} />
-        <Route path="/donations" element={<Donations />} />
+        <Route path="/sobre-nosotros" element={<AboutUs />} />
+        <Route path="/donaciones" element={<Donations />} />
         <Route path="/carrito" element={<Cart />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/admin/*" element={<Admin />} /> 
       </Routes>
       <Footer />
     </>
