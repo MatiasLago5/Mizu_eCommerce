@@ -1,8 +1,6 @@
 const { Product, Category, Subcategory } = require("../models");
 const { Op } = require("sequelize");
-const { all } = require("../routes/userRoutes");
 
-// Obtener todos los productos
 async function index(req, res) {
   try {
     const { 
@@ -16,8 +14,7 @@ async function index(req, res) {
     } = req.query;
     
     const whereCondition = { isActive: true };
-    
-    // Filtros
+
     if (categoryId) {
       whereCondition.categoryId = categoryId;
     }
@@ -32,8 +29,7 @@ async function index(req, res) {
     }
     
     const includeOptions = [];
-    
-    // Incluir categoría si se solicita
+
     if (includeCategory === 'true') {
       includeOptions.push({
         model: Category,
@@ -41,8 +37,7 @@ async function index(req, res) {
         attributes: ['id', 'name']
       });
     }
-    
-    // Incluir subcategoría si se solicita
+
     if (includeSubcategory === 'true') {
       includeOptions.push({
         model: Subcategory,
@@ -52,7 +47,6 @@ async function index(req, res) {
       });
     }
 
-    // Paginación
     const offset = (page - 1) * limit;
     
     const { count, rows: products } = await Product.findAndCountAll({
@@ -82,7 +76,6 @@ async function index(req, res) {
   }
 }
 
-// Obtener un producto específico
 async function show(req, res) {
   try {
     const { id } = req.params;
@@ -122,7 +115,6 @@ async function show(req, res) {
   }
 }
 
-// Crear nuevo producto
 async function store(req, res) {
   try {
     const { 
@@ -133,10 +125,10 @@ async function store(req, res) {
       subcategoryId, 
       stock = 0,
       imageUrl,
-      isActive = true 
+      isActive = true,
+      discountPercentage = 0
     } = req.body;
 
-    // Validaciones
     if (!name || !price || !categoryId) {
       return res.status(400).json({
         error: "Nombre, precio y categoría son requeridos"
@@ -155,7 +147,12 @@ async function store(req, res) {
       });
     }
 
-    // Verificar que la categoría existe
+    if (discountPercentage < 0 || discountPercentage > 100) {
+      return res.status(400).json({
+        error: "El descuento debe estar entre 0 y 100"
+      });
+    }
+
     const category = await Category.findByPk(categoryId);
     if (!category) {
       return res.status(400).json({
@@ -163,7 +160,6 @@ async function store(req, res) {
       });
     }
 
-    // Verificar subcategoría si se proporciona
     if (subcategoryId) {
       const subcategory = await Subcategory.findByPk(subcategoryId);
       if (!subcategory) {
@@ -171,8 +167,7 @@ async function store(req, res) {
           error: "La subcategoría especificada no existe"
         });
       }
-      
-      // Verificar que la subcategoría pertenece a la categoría
+
       if (subcategory.categoryId !== categoryId) {
         return res.status(400).json({
           error: "La subcategoría no pertenece a la categoría especificada"
@@ -188,10 +183,10 @@ async function store(req, res) {
       subcategoryId,
       stock,
       imageUrl,
-      isActive
+      isActive,
+      discountPercentage
     });
 
-    // Obtener el producto con sus relaciones
     const productWithRelations = await Product.findByPk(product.id, {
       include: [
         {
@@ -221,7 +216,6 @@ async function store(req, res) {
   }
 }
 
-// Actualizar producto
 async function update(req, res) {
   try {
     const { id } = req.params;
@@ -233,7 +227,8 @@ async function update(req, res) {
       subcategoryId, 
       stock,
       imageUrl,
-      isActive 
+      isActive,
+      discountPercentage
     } = req.body;
 
     const product = await Product.findByPk(id);
@@ -243,7 +238,6 @@ async function update(req, res) {
       });
     }
 
-    // Validaciones
     if (price !== undefined && price < 0) {
       return res.status(400).json({
         error: "El precio no puede ser negativo"
@@ -256,7 +250,12 @@ async function update(req, res) {
       });
     }
 
-    // Verificar categoría si se está actualizando
+    if (discountPercentage !== undefined && (discountPercentage < 0 || discountPercentage > 100)) {
+      return res.status(400).json({
+        error: "El descuento debe estar entre 0 y 100"
+      });
+    }
+
     if (categoryId && categoryId !== product.categoryId) {
       const category = await Category.findByPk(categoryId);
       if (!category) {
@@ -266,7 +265,6 @@ async function update(req, res) {
       }
     }
 
-    // Verificar subcategoría si se está actualizando
     if (subcategoryId !== undefined) {
       if (subcategoryId) {
         const subcategory = await Subcategory.findByPk(subcategoryId);
@@ -293,10 +291,10 @@ async function update(req, res) {
       subcategoryId: subcategoryId !== undefined ? subcategoryId : product.subcategoryId,
       stock: stock !== undefined ? stock : product.stock,
       imageUrl: imageUrl !== undefined ? imageUrl : product.imageUrl,
-      isActive: isActive !== undefined ? isActive : product.isActive
+      isActive: isActive !== undefined ? isActive : product.isActive,
+      discountPercentage: discountPercentage !== undefined ? discountPercentage : product.discountPercentage
     });
 
-    // Obtener el producto actualizado con sus relaciones
     const updatedProduct = await Product.findByPk(id, {
       include: [
         {
@@ -326,7 +324,6 @@ async function update(req, res) {
   }
 }
 
-// Eliminar producto (soft delete)
 async function destroy(req, res) {
   try {
     const { id } = req.params;
@@ -338,7 +335,6 @@ async function destroy(req, res) {
       });
     }
 
-    // Soft delete - marcar como inactivo
     await product.update({ isActive: false });
 
     res.json({
@@ -353,11 +349,10 @@ async function destroy(req, res) {
   }
 }
 
-// Actualizar stock del producto
 async function updateStock(req, res) {
   try {
     const { id } = req.params;
-    const { stock, operation = 'set' } = req.body; // 'set', 'add', 'subtract'
+    const { stock, operation = 'set' } = req.body;
 
     if (stock === undefined || stock < 0) {
       return res.status(400).json({

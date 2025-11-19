@@ -1,6 +1,5 @@
 const { Category, Subcategory, Product } = require("../models");
 
-// Obtener todas las subcategorías
 async function index(req, res) {
   try {
     const { categoryId, includeCategory, includeProducts } = req.query;
@@ -12,7 +11,6 @@ async function index(req, res) {
     
     const includeOptions = [];
     
-    // Incluir categoría padre si se solicita
     if (includeCategory === 'true') {
       includeOptions.push({
         model: Category,
@@ -21,8 +19,7 @@ async function index(req, res) {
         required: false
       });
     }
-    
-    // Incluir productos si se solicita
+
     if (includeProducts === 'true') {
       includeOptions.push({
         model: Product,
@@ -52,7 +49,6 @@ async function index(req, res) {
   }
 }
 
-// Obtener una subcategoría específica
 async function show(req, res) {
   try {
     const { id } = req.params;
@@ -101,19 +97,16 @@ async function show(req, res) {
   }
 }
 
-// Crear nueva subcategoría
 async function store(req, res) {
   try {
     const { name, categoryId, description, isActive = true } = req.body;
 
-    // Validaciones
     if (!name || !categoryId) {
       return res.status(400).json({
         error: "El nombre y categoryId son requeridos"
       });
     }
 
-    // Verificar que la categoría existe
     const category = await Category.findByPk(categoryId);
     if (!category) {
       return res.status(400).json({
@@ -121,7 +114,6 @@ async function store(req, res) {
       });
     }
 
-    // Verificar si ya existe una subcategoría con ese nombre en la misma categoría
     const existingSubcategory = await Subcategory.findOne({ 
       where: { name, categoryId } 
     });
@@ -138,7 +130,6 @@ async function store(req, res) {
       isActive
     });
 
-    // Incluir la categoría en la respuesta
     const subcategoryWithCategory = await Subcategory.findByPk(subcategory.id, {
       include: [{
         model: Category,
@@ -159,7 +150,6 @@ async function store(req, res) {
   }
 }
 
-// Actualizar subcategoría
 async function update(req, res) {
   try {
     const { id } = req.params;
@@ -172,7 +162,6 @@ async function update(req, res) {
       });
     }
 
-    // Si se está cambiando la categoría, verificar que existe
     if (categoryId && categoryId !== subcategory.categoryId) {
       const category = await Category.findByPk(categoryId);
       if (!category) {
@@ -182,7 +171,6 @@ async function update(req, res) {
       }
     }
 
-    // Verificar duplicados de nombre si se está actualizando
     if (name && (name !== subcategory.name || categoryId !== subcategory.categoryId)) {
       const finalCategoryId = categoryId || subcategory.categoryId;
       const existingSubcategory = await Subcategory.findOne({ 
@@ -202,7 +190,6 @@ async function update(req, res) {
       isActive: isActive !== undefined ? isActive : subcategory.isActive
     });
 
-    // Incluir la categoría en la respuesta
     const updatedSubcategory = await Subcategory.findByPk(id, {
       include: [{
         model: Category,
@@ -223,7 +210,6 @@ async function update(req, res) {
   }
 }
 
-// Eliminar subcategoría (soft delete)
 async function destroy(req, res) {
   try {
     const { id } = req.params;
@@ -235,7 +221,6 @@ async function destroy(req, res) {
       });
     }
 
-    // Verificar si hay productos asociados
     const productsCount = await Product.count({ where: { subcategoryId: id, isActive: true } });
     if (productsCount > 0) {
       return res.status(400).json({
@@ -243,7 +228,6 @@ async function destroy(req, res) {
       });
     }
 
-    // Soft delete - marcar como inactiva
     await subcategory.update({ isActive: false });
 
     res.json({

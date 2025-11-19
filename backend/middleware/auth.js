@@ -10,14 +10,12 @@ const authz = (req, res, next) => {
       });
     }
 
-    // Verificar token
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
         return res.status(403).json({ 
           error: 'Token inválido o expirado' 
         });
       }
-      // Agregar información del usuario al request
       req.user = decoded;
       next();
     });

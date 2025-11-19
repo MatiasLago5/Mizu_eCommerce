@@ -30,7 +30,7 @@ class Category extends Model {
         timestamps: true,
       },
     );
-
+    
     return Category;
   }
 

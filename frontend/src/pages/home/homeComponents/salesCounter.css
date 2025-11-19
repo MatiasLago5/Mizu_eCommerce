@@ -32,3 +32,11 @@
   letter-spacing: 0.05em;
   opacity: 0.9;
 }
+
+.counter-error {
+  width: 100%;
+  font-size: 0.95rem;
+  margin: 0 0 1rem 0;
+  color: #fde68a;
+  font-weight: 500;
+}

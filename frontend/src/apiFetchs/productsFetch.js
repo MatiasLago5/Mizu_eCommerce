@@ -1,11 +1,28 @@
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-export async function fetchProducts({ limit = 200 } = {}) {
+export async function fetchProducts({
+  limit = 200,
+  page = 1,
+  search,
+  categoryId,
+  subcategoryId,
+} = {}) {
   const url = new URL(`${API_BASE_URL}/products`);
   url.searchParams.set("limit", limit);
+  url.searchParams.set("page", page);
   url.searchParams.set("includeCategory", "true");
   url.searchParams.set("includeSubcategory", "true");
+
+  if (search) {
+    url.searchParams.set("search", search);
+  }
+  if (categoryId) {
+    url.searchParams.set("categoryId", categoryId);
+  }
+  if (subcategoryId) {
+    url.searchParams.set("subcategoryId", subcategoryId);
+  }
 
   const res = await fetch(url.toString());
   const payload = await res.json();

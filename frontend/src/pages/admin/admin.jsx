@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './adminStyles.css';
 import Dashboard from './adminComponents/dashboard';
+import ProductsManager from './adminComponents/productsManager';
+import OrdersManager from './adminComponents/ordersManager';
+import UsersManager from './adminComponents/usersManager';
+import RefugesManager from './adminComponents/RefugesManager';
 
 
 function Admin() {
@@ -11,8 +15,6 @@ function Admin() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar si el usuario es admin
-    // Decodificar el token para obtener el role
     const token = localStorage.getItem('mizu_token');
     
     if (!token) {
@@ -21,11 +23,9 @@ function Admin() {
     }
 
     try {
-      // Decodificar el JWT (sin verificar, solo para leer)
       const payload = JSON.parse(atob(token.split('.')[1]));
       
       if (payload.role !== 'admin') {
-        // No es admin, redirigir
         navigate('/');
         return;
       }
@@ -48,7 +48,6 @@ function Admin() {
 
   return (
     <div className="admin-container">
-      {/* Sidebar */}
       <aside className="admin-sidebar">
         <div className="sidebar-header">
           <h2 className="sidebar-title">MIZU Admin</h2>
@@ -96,8 +95,6 @@ function Admin() {
           </button>
         </div>
       </aside>
-
-      {/* Main Content */}
       <main className="admin-main">
         {activeSection === 'dashboard' && <Dashboard />}
         {activeSection === 'products' && <ProductsManager />}

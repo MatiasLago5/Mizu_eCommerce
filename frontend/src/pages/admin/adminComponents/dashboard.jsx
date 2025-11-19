@@ -1,34 +1,74 @@
 import { useState, useEffect } from 'react';
+import { fetchDashboardStats } from '../../../apiFetchs/adminFetch';
 
 function Dashboard() {
-  // Ejemplos - reemplazar con fetch real
   const [stats, setStats] = useState({
-    totalSales: 15750.50,
-    totalOrders: 156,
-    totalProducts: 45,
-    totalUsers: 234,
-    productsDonated: 52,
-    activeRefuges: 4
+    totalSales: 0,
+    totalOrders: 0,
+    totalProducts: 0,
+    totalUsers: 0,
+    productsDonated: 0,
+    activeRefuges: 0
   });
 
-  const [recentOrders, setRecentOrders] = useState([
-    { id: 1, customer: "Juan Pérez", total: 45.50, status: "Entregado", date: "2024-11-10" },
-    { id: 2, customer: "María García", total: 32.00, status: "En camino", date: "2024-11-12" },
-    { id: 3, customer: "Carlos López", total: 67.80, status: "Pendiente", date: "2024-11-14" }
-  ]);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const [topProducts, setTopProducts] = useState([
-    { name: "Mizu Pure Flow", sold: 156, revenue: 1388.40 },
-    { name: "Pasta Dental Menta", sold: 124, revenue: 806.00 },
-    { name: "Jabón Natural", sold: 98, revenue: 784.00 }
-  ]);
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
 
-  // Aquí irían los fetches reales:
-  // useEffect(() => {
-  //   fetchDashboardStats();
-  //   fetchRecentOrders();
-  //   fetchTopProducts();
-  // }, []);
+  const loadDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      const data = await fetchDashboardStats();
+      
+      setStats(data.stats || {
+        totalSales: 0,
+        totalOrders: 0,
+        totalProducts: 0,
+        totalUsers: 0,
+        productsDonated: 0,
+        activeRefuges: 0
+      });
+      
+      setRecentOrders(data.recentOrders || []);
+      setTopProducts(data.topProducts || []);
+    } catch (err) {
+      console.error('Error loading dashboard data:', err);
+      setError(err.message);
+      setStats({
+        totalSales: 15750.50,
+        totalOrders: 156,
+        totalProducts: 45,
+        totalUsers: 234,
+        productsDonated: 52,
+        activeRefuges: 4
+      });
+      setRecentOrders([
+        { id: 1, customer: "Juan Pérez", total: 45.50, status: "Entregado", date: "2024-11-10" },
+        { id: 2, customer: "María García", total: 32.00, status: "En camino", date: "2024-11-12" },
+        { id: 3, customer: "Carlos López", total: 67.80, status: "Pendiente", date: "2024-11-14" }
+      ]);
+      setTopProducts([
+        { name: "Mizu Pure Flow", sold: 156, revenue: 1388.40 },
+        { name: "Pasta Dental Menta", sold: 124, revenue: 806.00 },
+        { name: "Jabón Natural", sold: 98, revenue: 784.00 }
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="dashboard">
+        <div className="loading">Cargando datos del dashboard...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard">
@@ -36,6 +76,12 @@ function Dashboard() {
         <h1 className="section-title">Dashboard</h1>
         <p className="section-subtitle">Vista general del sistema</p>
       </div>
+
+      {error && (
+        <div className="error-message" style={{ marginBottom: '1rem', padding: '1rem', background: '#fee2e2', color: '#dc2626', borderRadius: '8px' }}>
+          Error al cargar datos: {error}. Mostrando datos de ejemplo.
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>

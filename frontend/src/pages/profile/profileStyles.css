@@ -215,6 +215,20 @@
   box-shadow: 0 4px 12px rgba(107, 155, 209, 0.3);
 }
 
+.status-message {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.status-message.success {
+  color: #059669;
+}
+
+.status-message.error {
+  color: #b91c1c;
+}
+
 .btn-logout {
   background: transparent;
   color: #ef4444;

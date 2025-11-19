@@ -4,12 +4,14 @@ const { User } = require("../models");
 module.exports = async () => {
   const users = [];
 
-  // Usuario administrador
+  // Admin
   users.push({
     name: "Admin Mizu",
     email: "admin@mizu.com",
     password: "admin123",
     role: "admin",
+    address: faker.location.streetAddress(),
+    phone: faker.number.int({ min: 900000000, max: 999999999 }),
   });
 
   for (let i = 0; i < 100; i++) {
@@ -20,6 +22,14 @@ module.exports = async () => {
       email: faker.internet.email({ firstName, lastName }),
       password: "password123",
       role: "usuario",
+      address: faker.helpers.maybe(
+        () => faker.location.streetAddress(),
+        { probability: 0.6 }
+      ) || null,
+      phone: faker.helpers.maybe(
+        () => faker.number.int({ min: 200000000, max: 999999999 }),
+        { probability: 0.7 }
+      ) || null,
     });
   }
 

@@ -1,18 +1,23 @@
 import { useCallback, useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom"; // ⬅️ AÑADIDO
+import { useNavigate } from "react-router-dom";
 import "./cartStyles.css";
 import {
   fetchCart,
   updateCartItemQuantity,
   removeCartItem,
 } from "../../apiFetchs/cartFetch";
+import { checkoutCart } from "../../apiFetchs/ordersFetch";
+import { useCart } from "../../context/CartContext";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [checkoutState, setCheckoutState] = useState({ status: "idle", message: "" });
+  const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
 
-  const navigate = useNavigate(); // ⬅️ AÑADIDO
+  const navigate = useNavigate();
+  const { refreshCart } = useCart();
 
   const loadCart = useCallback(async () => {
     try {
@@ -72,6 +77,33 @@ function Cart() {
     }
   };
 
+  const handleCheckout = async () => {
+    if (cartItems.length === 0) return;
+
+    setCheckoutState({ status: "loading", message: "Procesando tu compra..." });
+    setIsProcessingCheckout(true);
+
+    try {
+      const payload = await checkoutCart();
+      const donationCount = payload?.order?.donationCount ?? 0;
+
+      setCheckoutState({
+        status: "success",
+        message:
+          donationCount > 0
+            ? `¡Gracias! Con esta compra se donarán ${donationCount} producto${donationCount === 1 ? "" : "s"}.`
+            : "¡Gracias por tu compra!",
+      });
+
+      await loadCart();
+      refreshCart();
+    } catch (err) {
+      setCheckoutState({ status: "error", message: err?.message || "No pudimos completar el checkout" });
+    } finally {
+      setIsProcessingCheckout(false);
+    }
+  };
+
   const resolvePrice = (value, fallback) => {
     const numeric = Number(value ?? fallback ?? 0);
     return Number.isFinite(numeric) ? numeric : 0;
@@ -85,11 +117,8 @@ function Cart() {
   };
 
   const calculateDonations = () => {
-    let totalDonations = 0;
-    cartItems.forEach((item) => {
-      totalDonations += Math.floor(item.quantity / 3);
-    });
-    return totalDonations;
+    const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    return Math.floor(totalItems / 3);
   };
 
   const subtotal = calculateSubtotal();
@@ -121,7 +150,6 @@ function Cart() {
                   Agregá productos para comenzar tu compra
                 </p>
 
-                {/* ⬅️ BOTÓN ACTUALIZADO */}
                 <button
                   className="btn-shop"
                   onClick={() => navigate("/productos")}
@@ -240,7 +268,19 @@ function Cart() {
                 <span className="summary-value">${total.toFixed(2)}</span>
               </div>
 
-              <button className="btn-checkout">Proceder al pago</button>
+              {checkoutState.status !== "idle" && (
+                <p className={`checkout-status ${checkoutState.status}`}>
+                  {checkoutState.message}
+                </p>
+              )}
+
+              <button
+                className="btn-checkout"
+                onClick={handleCheckout}
+                disabled={isProcessingCheckout || cartItems.length === 0}
+              >
+                {isProcessingCheckout ? "Procesando..." : "Proceder al pago"}
+              </button>
 
               <button className="btn-continue">Seguir comprando</button>
             </div>

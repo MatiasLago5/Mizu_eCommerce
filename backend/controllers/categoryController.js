@@ -1,13 +1,11 @@
 const { Category, Subcategory, Product } = require("../models");
 
-// Obtener todas las categorías
 async function index(req, res) {
   try {
     const { includeSubcategories, includeProducts } = req.query;
     
     const includeOptions = [];
-    
-    // Incluir subcategorías si se solicita
+
     if (includeSubcategories === 'true') {
       includeOptions.push({
         model: Subcategory,
@@ -16,8 +14,7 @@ async function index(req, res) {
         required: false
       });
     }
-    
-    // Incluir productos si se solicita
+
     if (includeProducts === 'true') {
       includeOptions.push({
         model: Product,
@@ -47,7 +44,6 @@ async function index(req, res) {
   }
 }
 
-// Obtener una categoría específica
 async function show(req, res) {
   try {
     const { id } = req.params;
@@ -96,19 +92,16 @@ async function show(req, res) {
   }
 }
 
-// Crear nueva categoría
 async function store(req, res) {
   try {
     const { name, description, isActive = true } = req.body;
 
-    // Validaciones
     if (!name) {
       return res.status(400).json({
         error: "El nombre de la categoría es requerido"
       });
     }
 
-    // Verificar si ya existe una categoría con ese nombre
     const existingCategory = await Category.findOne({ where: { name } });
     if (existingCategory) {
       return res.status(400).json({
@@ -135,7 +128,6 @@ async function store(req, res) {
   }
 }
 
-// Actualizar categoría
 async function update(req, res) {
   try {
     const { id } = req.params;
@@ -148,7 +140,6 @@ async function update(req, res) {
       });
     }
 
-    // Verificar duplicados de nombre si se está actualizando
     if (name && name !== category.name) {
       const existingCategory = await Category.findOne({ where: { name } });
       if (existingCategory) {
@@ -177,7 +168,6 @@ async function update(req, res) {
   }
 }
 
-// Eliminar categoría (soft delete)
 async function destroy(req, res) {
   try {
     const { id } = req.params;
@@ -189,7 +179,6 @@ async function destroy(req, res) {
       });
     }
 
-    // Verificar si hay productos asociados
     const productsCount = await Product.count({ where: { categoryId: id, isActive: true } });
     if (productsCount > 0) {
       return res.status(400).json({
@@ -197,10 +186,8 @@ async function destroy(req, res) {
       });
     }
 
-    // Soft delete - marcar como inactiva
     await category.update({ isActive: false });
 
-    // También marcar subcategorías como inactivas
     await Subcategory.update(
       { isActive: false },
       { where: { categoryId: id } }

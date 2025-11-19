@@ -108,6 +108,44 @@
   background-color: rgba(107, 155, 209, 0.1);
 }
 
+.profile-link {
+  padding: 0;
+}
+
+.profile-initial {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #6B9BD1;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.profile-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.logout-button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 8px;
+  color: #4B5563;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.1);
+}
+
 /* Badge del carrito */
 .cart-icon {
   position: relative;

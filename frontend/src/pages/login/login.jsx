@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './loginStyles.css';
 import { loginUser, saveAuthToken } from '../../apiFetchs/usersFetch';
+import { useAuth } from '../../context/AuthContext';
 
 function Login() {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -60,6 +62,7 @@ function Login() {
 
       if (payload.token) {
         saveAuthToken(payload.token);
+        await refreshUser();
       }
 
       navigate('/');

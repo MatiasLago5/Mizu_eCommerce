@@ -8,3 +8,12 @@
   padding: 24px;
   background-color: #f5f5f5;
 }
+
+.route-guard {
+  min-height: 40vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4B5563;
+  font-size: 1rem;
+}

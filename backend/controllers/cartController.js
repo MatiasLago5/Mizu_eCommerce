@@ -1,6 +1,5 @@
 const { Cart, CartItem, Product } = require("../models");
 
-// Obtener el carrito del usuario autenticado
 async function getCart(req, res) {
   try {
     const userId = req.user.id;
@@ -76,7 +75,6 @@ async function addItem(req, res) {
       });
     }
 
-    // Verificar stock
     if (product.stock < quantity) {
       return res.status(400).json({
         error: `Stock insuficiente. Disponible: ${product.stock}`,

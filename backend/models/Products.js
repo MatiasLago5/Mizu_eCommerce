@@ -36,7 +36,7 @@ class Product extends Model {
         },
         subcategoryId: {
           type: DataTypes.UUID,
-          allowNull: true, // Un producto puede no tener subcategoría
+          allowNull: true,
           references: {
             model: 'ProductsSubcategories',
             key: 'id',
@@ -56,6 +56,15 @@ class Product extends Model {
           type: DataTypes.BOOLEAN,
           defaultValue: true,
         },
+        discountPercentage: {
+          type: DataTypes.DECIMAL(5, 2),
+          allowNull: true,
+          defaultValue: 0.0,
+          validate: {
+            min: 0,
+            max: 100,
+          }
+        },
         imageUrl: {
           type: DataTypes.STRING,
           allowNull: true,
@@ -64,7 +73,7 @@ class Product extends Model {
       {
         sequelize,
         modelName: "Product",
-        tableName: "Products", // Coincide con la migración
+        tableName: "Products",
         timestamps: true,
       },
     );
@@ -72,25 +81,21 @@ class Product extends Model {
     return Product;
   }
 
-  // Método para obtener la categoría del producto
   async getCategory() {
     const { Category } = require("./index");
     return await Category.findByPk(this.categoryId);
   }
 
-  // Método para obtener la subcategoría del producto
   async getSubcategory() {
     if (!this.subcategoryId) return null;
     const { Subcategory } = require("./index");
     return await Subcategory.findByPk(this.subcategoryId);
   }
 
-  // Método para verificar si hay stock disponible
   hasStock(quantity = 1) {
     return this.stock >= quantity;
   }
 
-  // Método para reducir stock
   async reduceStock(quantity) {
     if (!this.hasStock(quantity)) {
       throw new Error('Stock insuficiente');
@@ -100,7 +105,6 @@ class Product extends Model {
     return this;
   }
 
-  // Método para aumentar stock
   async increaseStock(quantity) {
     this.stock += quantity;
     await this.save();

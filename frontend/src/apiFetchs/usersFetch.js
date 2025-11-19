@@ -33,6 +33,41 @@ export async function loginUser({ email, password }) {
   return handleResponse(res);
 }
 
+async function authorizedFetch(path, { method = "GET", body, headers = {} } = {}) {
+  const finalHeaders = {
+    ...authHeaders(),
+    ...headers,
+  };
+
+  if (body && !finalHeaders["Content-Type"]) {
+    finalHeaders["Content-Type"] = "application/json";
+  }
+
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method,
+    headers: finalHeaders,
+    body,
+  });
+
+  return handleResponse(res);
+}
+
+export async function fetchUserProfile() {
+  const payload = await authorizedFetch(`/users/profile`);
+  return payload?.user || payload?.data || payload;
+}
+
+export async function changeUserPassword({ currentPassword, newPassword }) {
+  if (!currentPassword || !newPassword) {
+    throw new Error("La contraseña actual y la nueva contraseña son requeridas");
+  }
+
+  return authorizedFetch(`/users/change-password`, {
+    method: "PUT",
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+}
+
 export function saveAuthToken(token) {
   if (typeof window !== 'undefined' && token) {
     localStorage.setItem('mizu_token', token);

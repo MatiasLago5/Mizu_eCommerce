@@ -1,18 +1,18 @@
 'use strict';
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('CartItems', {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable('OrderItems', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-      cartId: {
+      orderId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'Carts',
+          model: 'Orders',
           key: 'id',
         },
         onUpdate: 'CASCADE',
@@ -20,45 +20,40 @@ module.exports = {
       },
       productId: {
         type: Sequelize.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'Products',
           key: 'id',
         },
         onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
+        onDelete: 'SET NULL',
       },
       quantity: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        defaultValue: 1,
-        validate: {
-          min: 1,
-        },
       },
-      price: {
+      unitPrice: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
-        comment: 'Precio del producto al momento de agregarlo al carrito',
+      },
+      subtotal: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false,
       },
       createdAt: {
         type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
       updatedAt: {
         type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
-    });
-
-    // Índice único para evitar duplicados de producto en el mismo carrito
-    await queryInterface.addIndex('CartItems', ['cartId', 'productId'], {
-      unique: true,
-      name: 'cart_product_unique',
     });
   },
 
-  down: async (queryInterface) => {
-    await queryInterface.dropTable('CartItems');
+  async down(queryInterface) {
+    await queryInterface.dropTable('OrderItems');
   },
 };

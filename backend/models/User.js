@@ -31,6 +31,19 @@ class User extends Model {
             isIn: [["usuario", "admin"]],
           },
         },
+        address: {
+          type: DataTypes.STRING,
+          allowNull: true,
+          defaultValue: null,
+        },
+        phone: {
+          type: DataTypes.BIGINT,
+          allowNull: true,
+          defaultValue: null,
+          validate: {
+            isInt: true,
+          },
+        },
       },
       {
         sequelize,

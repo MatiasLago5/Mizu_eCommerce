@@ -13,9 +13,21 @@ const generateToken = (user) => {
   );
 };
 
+const normalizePhoneInput = (value) => {
+  if (value === undefined) return undefined;
+  if (value === null || value === '') return null;
+
+  const numeric = Number(value);
+  if (!Number.isInteger(numeric)) {
+    throw new Error('PHONE_NOT_INTEGER');
+  }
+
+  return numeric;
+};
+
 async function register(req, res) {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, addresses = null, phone } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({
         error: "Todos los campos son requeridos"
@@ -29,11 +41,25 @@ async function register(req, res) {
       });
     }
     
+    let normalizedPhone;
+    try {
+      normalizedPhone = normalizePhoneInput(phone);
+    } catch (err) {
+      if (err.message === 'PHONE_NOT_INTEGER') {
+        return res.status(400).json({
+          error: 'El teléfono debe ser un número entero',
+        });
+      }
+      throw err;
+    }
+
     const user = await User.create({
       name,
       email,
       password,
       role: "usuario",
+      addresses: addresses || null,
+      phone: normalizedPhone ?? null,
     });
 
     const token = generateToken(user);
@@ -196,7 +222,7 @@ async function store(req, res) {
 async function update(req, res) {
   try {
     const { id } = req.params;
-    const { name, email } = req.body; 
+    const { name, email, addresses, phone } = req.body; 
 
     const user = await User.findByPk(id);
     if (!user) {
@@ -205,7 +231,31 @@ async function update(req, res) {
       });
     }
 
-    await user.update({ name, email });
+    let normalizedPhone;
+    if (phone !== undefined) {
+      try {
+        normalizedPhone = normalizePhoneInput(phone);
+      } catch (err) {
+        if (err.message === 'PHONE_NOT_INTEGER') {
+          return res.status(400).json({
+            error: 'El teléfono debe ser un número entero',
+          });
+        }
+        throw err;
+      }
+    }
+
+    const payload = {
+      name,
+      email,
+      addresses,
+    };
+
+    if (phone !== undefined) {
+      payload.phone = normalizedPhone ?? null;
+    }
+
+    await user.update(payload);
     
     res.json({
       message: "Usuario actualizado exitosamente",
