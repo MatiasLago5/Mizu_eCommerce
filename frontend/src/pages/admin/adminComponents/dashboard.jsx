@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import { fetchDashboardStats } from '../../../apiFetchs/adminFetch';
 
+const STATUS_LABELS = {
+  pagado: 'Pagado',
+  pendiente: 'Pendiente',
+  cancelado: 'Cancelado'
+};
+
 function Dashboard() {
   const [stats, setStats] = useState({
     totalSales: 0,
@@ -24,7 +30,7 @@ function Dashboard() {
     try {
       setIsLoading(true);
       const data = await fetchDashboardStats();
-      
+
       setStats(data.stats || {
         totalSales: 0,
         totalOrders: 0,
@@ -33,30 +39,15 @@ function Dashboard() {
         productsDonated: 0,
         activeRefuges: 0
       });
-      
-      setRecentOrders(data.recentOrders || []);
-      setTopProducts(data.topProducts || []);
+
+      setRecentOrders(Array.isArray(data.recentOrders) ? data.recentOrders : []);
+      setTopProducts(Array.isArray(data.topProducts) ? data.topProducts : []);
     } catch (err) {
       console.error('Error loading dashboard data:', err);
       setError(err.message);
-      setStats({
-        totalSales: 15750.50,
-        totalOrders: 156,
-        totalProducts: 45,
-        totalUsers: 234,
-        productsDonated: 52,
-        activeRefuges: 4
-      });
-      setRecentOrders([
-        { id: 1, customer: "Juan Pérez", total: 45.50, status: "Entregado", date: "2024-11-10" },
-        { id: 2, customer: "María García", total: 32.00, status: "En camino", date: "2024-11-12" },
-        { id: 3, customer: "Carlos López", total: 67.80, status: "Pendiente", date: "2024-11-14" }
-      ]);
-      setTopProducts([
-        { name: "Mizu Pure Flow", sold: 156, revenue: 1388.40 },
-        { name: "Pasta Dental Menta", sold: 124, revenue: 806.00 },
-        { name: "Jabón Natural", sold: 98, revenue: 784.00 }
-      ]);
+      setStats((prev) => ({ ...prev }));
+      setRecentOrders([]);
+      setTopProducts([]);
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +74,6 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         <div className="admin-card" style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>💰</div>
@@ -134,9 +124,7 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Recent Orders & Top Products */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
-        {/* Recent Orders */}
         <div className="admin-card">
           <h3 style={{ fontSize: '1.25rem', fontWeight: '500', marginBottom: '1.5rem', color: '#1a1a1a' }}>
             Pedidos Recientes
@@ -146,28 +134,27 @@ function Dashboard() {
               <div key={order.id} style={{ padding: '1rem', background: '#f9fafb', borderRadius: '8px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                   <span style={{ fontWeight: '500', color: '#1a1a1a' }}>{order.customer}</span>
-                  <span style={{ color: '#6B9BD1', fontWeight: '500' }}>${order.total.toFixed(2)}</span>
+                  <span style={{ color: '#6B9BD1', fontWeight: '500' }}>${Number(order.total).toFixed(2)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: '#6b7280' }}>
-                  <span>{order.date}</span>
-                  <span>{order.status}</span>
+                  <span>{new Date(order.date).toLocaleDateString()}</span>
+                  <span>{STATUS_LABELS[order.status] || order.status}</span>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Top Products */}
         <div className="admin-card">
           <h3 style={{ fontSize: '1.25rem', fontWeight: '500', marginBottom: '1.5rem', color: '#1a1a1a' }}>
             Productos Más Vendidos
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {topProducts.map((product, idx) => (
-              <div key={idx} style={{ padding: '1rem', background: '#f9fafb', borderRadius: '8px' }}>
+              <div key={product.id || idx} style={{ padding: '1rem', background: '#f9fafb', borderRadius: '8px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                   <span style={{ fontWeight: '500', color: '#1a1a1a' }}>{product.name}</span>
-                  <span style={{ color: '#10b981', fontWeight: '500' }}>${product.revenue.toFixed(2)}</span>
+                  <span style={{ color: '#10b981', fontWeight: '500' }}>${Number(product.revenue || 0).toFixed(2)}</span>
                 </div>
                 <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
                   {product.sold} unidades vendidas

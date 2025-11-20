@@ -21,9 +21,9 @@ function ProductsManager() {
     description: '',
     price: '',
     stock: '',
-    category_id: '',
-    subcategory_id: '',
-    image_url: ''
+    categoryId: '',
+    subcategoryId: '',
+    imageUrl: ''
   });
 
   useEffect(() => {
@@ -40,8 +40,8 @@ function ProductsManager() {
       ]);
       
       setProducts(productsData);
-      setCategories(categoriesData.data || []);
-      setSubcategories(subcategoriesData.data || []);
+      setCategories(categoriesData);
+      setSubcategories(subcategoriesData);
     } catch (err) {
       setError(err.message);
       console.error('Error loading data:', err);
@@ -56,8 +56,28 @@ function ProductsManager() {
       const productData = {
         ...formData,
         price: parseFloat(formData.price),
-        stock: parseInt(formData.stock)
+        stock: parseInt(formData.stock, 10),
       };
+
+      if (!productData.categoryId) {
+        throw new Error('Seleccioná una categoría');
+      }
+
+      if (!Number.isFinite(productData.price) || productData.price < 0) {
+        throw new Error('Ingresá un precio válido');
+      }
+
+      if (!Number.isInteger(productData.stock) || productData.stock < 0) {
+        throw new Error('Ingresá un stock válido');
+      }
+
+      if (!productData.subcategoryId) {
+        productData.subcategoryId = null;
+      }
+
+      if (!productData.imageUrl) {
+        delete productData.imageUrl;
+      }
 
       if (editingProduct) {
         await updateProduct(editingProduct.id, productData);
@@ -79,9 +99,9 @@ function ProductsManager() {
       description: product.description || '',
       price: product.price || '',
       stock: product.stock || '',
-      category_id: product.category_id || '',
-      subcategory_id: product.subcategory_id || '',
-      image_url: product.image_url || ''
+      categoryId: product.categoryId || product.category?.id || '',
+      subcategoryId: product.subcategoryId || product.subcategory?.id || '',
+      imageUrl: product.imageUrl || ''
     });
     setShowModal(true);
   };
@@ -105,14 +125,14 @@ function ProductsManager() {
       description: '',
       price: '',
       stock: '',
-      category_id: '',
-      subcategory_id: '',
-      image_url: ''
+      categoryId: '',
+      subcategoryId: '',
+      imageUrl: ''
     });
   };
 
   const getFilteredSubcategories = () => {
-    return subcategories.filter(sub => sub.category_id == formData.category_id);
+    return subcategories.filter(sub => String(sub.categoryId) === String(formData.categoryId));
   };
 
   if (isLoading) {
@@ -153,9 +173,9 @@ function ProductsManager() {
             {products.map(product => (
               <tr key={product.id}>
                 <td>
-                  {product.image_url ? (
+                  {product.imageUrl ? (
                     <img 
-                      src={product.image_url} 
+                      src={product.imageUrl} 
                       alt={product.name}
                       style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                     />
@@ -169,8 +189,8 @@ function ProductsManager() {
                 <td>${product.price}</td>
                 <td>{product.stock}</td>
                 <td>
-                  {product.Category?.name}
-                  {product.Subcategory && ` - ${product.Subcategory.name}`}
+                  {product.category?.name || product.Category?.name || 'Sin categoría'}
+                  {product.subcategory?.name && ` - ${product.subcategory.name}`}
                 </td>
                 <td>
                   <button 
@@ -247,8 +267,8 @@ function ProductsManager() {
                 <div className="form-group">
                   <label>Categoría *</label>
                   <select
-                    value={formData.category_id}
-                    onChange={(e) => setFormData({...formData, category_id: e.target.value, subcategory_id: ''})}
+                    value={formData.categoryId}
+                    onChange={(e) => setFormData({...formData, categoryId: e.target.value, subcategoryId: ''})}
                     required
                   >
                     <option value="">Seleccionar categoría</option>
@@ -262,9 +282,9 @@ function ProductsManager() {
                 <div className="form-group">
                   <label>Subcategoría</label>
                   <select
-                    value={formData.subcategory_id}
-                    onChange={(e) => setFormData({...formData, subcategory_id: e.target.value})}
-                    disabled={!formData.category_id}
+                    value={formData.subcategoryId}
+                    onChange={(e) => setFormData({...formData, subcategoryId: e.target.value})}
+                    disabled={!formData.categoryId}
                   >
                     <option value="">Seleccionar subcategoría</option>
                     {getFilteredSubcategories().map(subcategory => (
@@ -279,8 +299,8 @@ function ProductsManager() {
                 <label>URL de Imagen</label>
                 <input
                   type="url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({...formData, image_url: e.target.value})}
+                  value={formData.imageUrl}
+                  onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
                   placeholder="https://ejemplo.com/imagen.jpg"
                 />
               </div>

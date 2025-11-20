@@ -21,7 +21,6 @@ async function handleResponse(res) {
   return payload;
 }
 
-// Dashboard Stats
 export async function fetchDashboardStats() {
   const res = await fetch(`${API_BASE_URL}/admin/stats`, {
     headers: getAuthHeaders()
@@ -29,12 +28,12 @@ export async function fetchDashboardStats() {
   return handleResponse(res);
 }
 
-// Users Management
 export async function fetchAllUsers() {
   const res = await fetch(`${API_BASE_URL}/admin/users`, {
     headers: getAuthHeaders()
   });
-  return handleResponse(res);
+  const payload = await handleResponse(res);
+  return payload?.data || [];
 }
 
 export async function updateUserRole(userId, role) {
@@ -54,7 +53,6 @@ export async function deleteUser(userId) {
   return handleResponse(res);
 }
 
-// Products Management
 export async function createProduct(productData) {
   const res = await fetch(`${API_BASE_URL}/products`, {
     method: 'POST',
@@ -81,10 +79,10 @@ export async function deleteProduct(productId) {
   return handleResponse(res);
 }
 
-// Categories Management
 export async function fetchCategories() {
   const res = await fetch(`${API_BASE_URL}/categories`);
-  return handleResponse(res);
+  const payload = await handleResponse(res);
+  return payload?.data || [];
 }
 
 export async function createCategory(categoryData) {
@@ -113,10 +111,10 @@ export async function deleteCategory(categoryId) {
   return handleResponse(res);
 }
 
-// Subcategories Management
 export async function fetchSubcategories() {
   const res = await fetch(`${API_BASE_URL}/subcategories`);
-  return handleResponse(res);
+  const payload = await handleResponse(res);
+  return payload?.data || [];
 }
 
 export async function createSubcategory(subcategoryData) {
@@ -145,12 +143,12 @@ export async function deleteSubcategory(subcategoryId) {
   return handleResponse(res);
 }
 
-// Orders Management
 export async function fetchAllOrders() {
   const res = await fetch(`${API_BASE_URL}/admin/orders`, {
     headers: getAuthHeaders()
   });
-  return handleResponse(res);
+  const payload = await handleResponse(res);
+  return payload?.data || [];
 }
 
 export async function updateOrderStatus(orderId, status) {
@@ -162,12 +160,12 @@ export async function updateOrderStatus(orderId, status) {
   return handleResponse(res);
 }
 
-// Refuges Management (placeholder for future implementation)
 export async function fetchRefuges() {
   const res = await fetch(`${API_BASE_URL}/admin/refuges`, {
     headers: getAuthHeaders()
   });
-  return handleResponse(res);
+  const payload = await handleResponse(res);
+  return payload?.data || [];
 }
 
 export async function createRefuge(refugeData) {

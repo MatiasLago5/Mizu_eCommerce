@@ -16,7 +16,7 @@ function UsersManager() {
     try {
       setIsLoading(true);
       const data = await fetchAllUsers();
-      setUsers(data.data || []);
+      setUsers(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.message);
       console.error('Error loading users:', err);
@@ -55,7 +55,7 @@ function UsersManager() {
   const getUserStats = () => {
     const total = users.length;
     const admins = users.filter(u => u.role === 'admin').length;
-    const regularUsers = users.filter(u => u.role === 'user').length;
+    const regularUsers = users.filter(u => u.role === 'usuario').length;
     return { total, admins, regularUsers };
   };
 
@@ -109,7 +109,7 @@ function UsersManager() {
             className="filter-select"
           >
             <option value="all">Todos los roles</option>
-            <option value="user">Usuario</option>
+            <option value="usuario">Usuario</option>
             <option value="admin">Administrador</option>
           </select>
         </div>
@@ -139,12 +139,12 @@ function UsersManager() {
                     onChange={(e) => handleRoleChange(user.id, e.target.value)}
                     className={`role-select ${user.role}`}
                   >
-                    <option value="user">Usuario</option>
+                    <option value="usuario">Usuario</option>
                     <option value="admin">Admin</option>
                   </select>
                 </td>
                 <td>
-                  {new Date(user.created_at || user.createdAt).toLocaleDateString()}
+                  {new Date(user.createdAt || user.created_at).toLocaleDateString()}
                 </td>
                 <td>
                   <button 

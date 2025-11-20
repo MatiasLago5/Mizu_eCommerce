@@ -3,9 +3,11 @@ import { useParams } from "react-router-dom";
 import "./productDetailStyles.css";
 import { fetchProductById } from "../../apiFetchs/productsFetch";
 import { addOrUpdateCartItem } from "../../apiFetchs/cartFetch";
+import { useCart } from "../../context/CartContext";
 
 function ProductDetail() {
   const { id } = useParams();
+  const { refreshCart } = useCart();
 
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -97,6 +99,7 @@ function ProductDetail() {
         type: "success",
         message: "Producto agregado al carrito",
       });
+      refreshCart();
     } catch (err) {
       setFeedback({
         type: "error",

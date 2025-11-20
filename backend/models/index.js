@@ -29,6 +29,7 @@ const Cart = require("./Cart");
 const CartItem = require("./CartItem");
 const Order = require("./Order");
 const OrderItem = require("./OrderItem");
+const Refuge = require("./Refuge");
 
 // Inicializar todos los modelos:
 User.initModel(sequelize);
@@ -39,6 +40,7 @@ Cart.initModel(sequelize);
 CartItem.initModel(sequelize);
 Order.initModel(sequelize);
 OrderItem.initModel(sequelize);
+Refuge.initModel(sequelize);
 
 // Definir las relaciones entre los modelos:
 Category.hasMany(Subcategory, {
@@ -175,4 +177,5 @@ module.exports = {
   CartItem,
   Order,
   OrderItem,
+  Refuge,
 };

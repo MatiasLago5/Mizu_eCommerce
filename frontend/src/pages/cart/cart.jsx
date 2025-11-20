@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import "./cartStyles.css";
 import {
@@ -7,17 +8,17 @@ import {
   removeCartItem,
 } from "../../apiFetchs/cartFetch";
 import { checkoutCart } from "../../apiFetchs/ordersFetch";
-import { useCart } from "../../context/CartContext";
+import { setCartItems as setCartItemsAction } from "../../store/cartSlice";
 
 function Cart() {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setLocalCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [checkoutState, setCheckoutState] = useState({ status: "idle", message: "" });
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
 
   const navigate = useNavigate();
-  const { refreshCart } = useCart();
+  const dispatch = useDispatch();
 
   const loadCart = useCallback(async () => {
     try {
@@ -25,17 +26,20 @@ function Cart() {
       setLoading(true);
       const cart = await fetchCart();
       if (cart && Array.isArray(cart.items)) {
-        setCartItems(cart.items);
+        setLocalCartItems(cart.items);
+        dispatch(setCartItemsAction(cart));
       } else {
-        setCartItems([]);
+        setLocalCartItems([]);
+        dispatch(setCartItemsAction([]));
       }
     } catch (err) {
       setError(err?.message ?? "Error al obtener el carrito");
-      setCartItems([]);
+      setLocalCartItems([]);
+      dispatch(setCartItemsAction([]));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     loadCart();
@@ -53,16 +57,18 @@ function Cart() {
 
       if (!updatedItem) return;
 
-      setCartItems((prev) =>
-        prev.map((current) =>
+      setLocalCartItems((prev) => {
+        const nextItems = prev.map((current) =>
           current.id === item.id
             ? {
                 ...current,
                 ...updatedItem,
               }
             : current
-        )
-      );
+        );
+        dispatch(setCartItemsAction(nextItems));
+        return nextItems;
+      });
     } catch (err) {
       setError(err?.message ?? "No se pudo actualizar la cantidad");
     }
@@ -71,7 +77,11 @@ function Cart() {
   const removeItem = async (itemId) => {
     try {
       await removeCartItem({ itemId });
-      setCartItems((prev) => prev.filter((item) => item.id !== itemId));
+      setLocalCartItems((prev) => {
+        const nextItems = prev.filter((item) => item.id !== itemId);
+        dispatch(setCartItemsAction(nextItems));
+        return nextItems;
+      });
     } catch (err) {
       setError(err?.message ?? "No se pudo eliminar el producto");
     }
@@ -96,7 +106,6 @@ function Cart() {
       });
 
       await loadCart();
-      refreshCart();
     } catch (err) {
       setCheckoutState({ status: "error", message: err?.message || "No pudimos completar el checkout" });
     } finally {

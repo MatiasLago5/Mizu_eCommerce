@@ -10,7 +10,7 @@ function RefugesManager() {
   const [formData, setFormData] = useState({
     name: '',
     location: '',
-    contact_email: '',
+    contactEmail: '',
     phone: '',
     description: '',
     capacity: '',
@@ -25,7 +25,7 @@ function RefugesManager() {
     try {
       setIsLoading(true);
       const data = await fetchRefuges();
-      setRefuges(data.data || []);
+      setRefuges(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.message);
       console.error('Error loading refuges:', err);
@@ -54,7 +54,7 @@ function RefugesManager() {
     setFormData({
       name: refuge.name || '',
       location: refuge.location || '',
-      contact_email: refuge.contact_email || '',
+      contactEmail: refuge.contactEmail || '',
       phone: refuge.phone || '',
       description: refuge.description || '',
       capacity: refuge.capacity || '',
@@ -80,7 +80,7 @@ function RefugesManager() {
     setFormData({
       name: '',
       location: '',
-      contact_email: '',
+      contactEmail: '',
       phone: '',
       description: '',
       capacity: '',
@@ -118,7 +118,7 @@ function RefugesManager() {
             <div key={refuge.id} className="admin-card">
               <h3>{refuge.name}</h3>
               <p><strong>Ubicación:</strong> {refuge.location}</p>
-              <p><strong>Email:</strong> {refuge.contact_email}</p>
+              <p><strong>Email:</strong> {refuge.contactEmail}</p>
               <p><strong>Teléfono:</strong> {refuge.phone}</p>
               <p><strong>Capacidad:</strong> {refuge.capacity}</p>
               <p><strong>Descripción:</strong> {refuge.description}</p>
@@ -176,8 +176,8 @@ function RefugesManager() {
                 <label>Email de Contacto *</label>
                 <input
                   type="email"
-                  value={formData.contact_email}
-                  onChange={(e) => setFormData({...formData, contact_email: e.target.value})}
+                  value={formData.contactEmail}
+                  onChange={(e) => setFormData({...formData, contactEmail: e.target.value})}
                   required
                 />
               </div>

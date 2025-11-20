@@ -9,11 +9,9 @@ function OrdersManager() {
   const [sortBy, setSortBy] = useState('date_desc');
 
   const orderStatuses = {
-    'pending': { label: 'Pendiente', color: '#f59e0b' },
-    'confirmed': { label: 'Confirmado', color: '#3b82f6' },
-    'shipped': { label: 'Enviado', color: '#8b5cf6' },
-    'delivered': { label: 'Entregado', color: '#10b981' },
-    'cancelled': { label: 'Cancelado', color: '#ef4444' }
+    'pendiente': { label: 'Pendiente', color: '#f59e0b' },
+    'pagado': { label: 'Pagado', color: '#10b981' },
+    'cancelado': { label: 'Cancelado', color: '#ef4444' }
   };
 
   useEffect(() => {
@@ -24,7 +22,7 @@ function OrdersManager() {
     try {
       setIsLoading(true);
       const data = await fetchAllOrders();
-      setOrders(data.data || []);
+      setOrders(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.message);
       console.error('Error loading orders:', err);
@@ -52,13 +50,13 @@ function OrdersManager() {
     return filtered.sort((a, b) => {
       switch (sortBy) {
         case 'date_desc':
-          return new Date(b.created_at || b.createdAt) - new Date(a.created_at || a.createdAt);
+          return new Date(b.createdAt || b.created_at) - new Date(a.createdAt || a.created_at);
         case 'date_asc':
-          return new Date(a.created_at || a.createdAt) - new Date(b.created_at || b.createdAt);
+          return new Date(a.createdAt || a.created_at) - new Date(b.createdAt || b.created_at);
         case 'total_desc':
-          return (b.total || 0) - (a.total || 0);
+          return Number(b.totalAmount || 0) - Number(a.totalAmount || 0);
         case 'total_asc':
-          return (a.total || 0) - (b.total || 0);
+          return Number(a.totalAmount || 0) - Number(b.totalAmount || 0);
         default:
           return 0;
       }
@@ -67,13 +65,12 @@ function OrdersManager() {
 
   const getOrderStats = () => {
     const total = orders.length;
-    const pending = orders.filter(o => o.status === 'pending').length;
-    const confirmed = orders.filter(o => o.status === 'confirmed').length;
-    const shipped = orders.filter(o => o.status === 'shipped').length;
-    const delivered = orders.filter(o => o.status === 'delivered').length;
-    const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+    const pending = orders.filter(o => o.status === 'pendiente').length;
+    const paid = orders.filter(o => o.status === 'pagado').length;
+    const cancelled = orders.filter(o => o.status === 'cancelado').length;
+    const totalRevenue = orders.reduce((sum, order) => sum + Number(order.totalAmount || 0), 0);
     
-    return { total, pending, confirmed, shipped, delivered, totalRevenue };
+    return { total, pending, paid, cancelled, totalRevenue };
   };
 
   const stats = getOrderStats();
@@ -105,16 +102,12 @@ function OrdersManager() {
           <p>Pendientes</p>
         </div>
         <div className="stat-card">
-          <h3>{stats.confirmed}</h3>
-          <p>Confirmados</p>
+          <h3>{stats.paid}</h3>
+          <p>Pagados</p>
         </div>
         <div className="stat-card">
-          <h3>{stats.shipped}</h3>
-          <p>Enviados</p>
-        </div>
-        <div className="stat-card">
-          <h3>{stats.delivered}</h3>
-          <p>Entregados</p>
+          <h3>{stats.cancelled}</h3>
+          <p>Cancelados</p>
         </div>
         <div className="stat-card">
           <h3>${stats.totalRevenue.toFixed(2)}</h3>
@@ -171,16 +164,16 @@ function OrdersManager() {
               <tr key={order.id}>
                 <td>#{order.id}</td>
                 <td>
-                  {order.User?.name || order.customer_name || 'Cliente no encontrado'}
+                  {order.user?.name || order.customer_name || 'Cliente no encontrado'}
                   <br />
-                  <small>{order.User?.email || order.customer_email}</small>
+                  <small>{order.user?.email || order.customer_email}</small>
                 </td>
                 <td>
-                  {new Date(order.created_at || order.createdAt).toLocaleDateString()}
+                  {new Date(order.createdAt || order.created_at).toLocaleDateString()}
                   <br />
-                  <small>{new Date(order.created_at || order.createdAt).toLocaleTimeString()}</small>
+                  <small>{new Date(order.createdAt || order.created_at).toLocaleTimeString()}</small>
                 </td>
-                <td>${(order.total || 0).toFixed(2)}</td>
+                <td>${Number(order.totalAmount || 0).toFixed(2)}</td>
                 <td>
                   <span 
                     className="status-badge"
