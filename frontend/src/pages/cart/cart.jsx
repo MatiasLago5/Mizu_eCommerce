@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import "./cartStyles.css";
@@ -8,7 +8,32 @@ import {
   removeCartItem,
 } from "../../apiFetchs/cartFetch";
 import { checkoutCart } from "../../apiFetchs/ordersFetch";
+import {
+  fetchUserAddress,
+  saveUserAddress,
+} from "../../apiFetchs/usersFetch";
 import { setCartItems as setCartItemsAction } from "../../store/cartSlice";
+
+const DELIVERY_COST = 50;
+const CHECKOUT_STEPS = ["Datos de envío", "Confirmación"];
+const REQUIRED_ADDRESS_FIELDS = [
+  "fullName",
+  "phone",
+  "street",
+  "city",
+  "department",
+];
+
+const EMPTY_ADDRESS = {
+  fullName: "",
+  phone: "",
+  street: "",
+  city: "",
+  department: "",
+  postalCode: "",
+  reference: "",
+  country: "Uruguay",
+};
 
 function Cart() {
   const [cartItems, setLocalCartItems] = useState([]);
@@ -16,6 +41,12 @@ function Cart() {
   const [error, setError] = useState(null);
   const [checkoutState, setCheckoutState] = useState({ status: "idle", message: "" });
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
+  const [shippingMethod, setShippingMethod] = useState("delivery");
+  const [addressForm, setAddressForm] = useState(EMPTY_ADDRESS);
+  const [isAddressLoading, setIsAddressLoading] = useState(false);
+  const [isAddressSaving, setIsAddressSaving] = useState(false);
+  const [shippingError, setShippingError] = useState("");
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -41,9 +72,28 @@ function Cart() {
     }
   }, [dispatch]);
 
+  const loadAddress = useCallback(async () => {
+    try {
+      setIsAddressLoading(true);
+      setShippingError("");
+      const address = await fetchUserAddress();
+      if (address) {
+        setAddressForm((prev) => ({ ...prev, ...address }));
+      }
+    } catch (err) {
+      setShippingError(err?.message ?? "No pudimos cargar tu dirección");
+    } finally {
+      setIsAddressLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadCart();
   }, [loadCart]);
+
+  useEffect(() => {
+    loadAddress();
+  }, [loadAddress]);
 
   const updateQuantity = async (item, delta) => {
     const nextQuantity = item.quantity + delta;
@@ -87,14 +137,48 @@ function Cart() {
     }
   };
 
+  const isDeliveryFormValid = useMemo(
+    () =>
+      REQUIRED_ADDRESS_FIELDS.every((field) =>
+        Boolean(addressForm[field]?.toString().trim())
+      ),
+    [addressForm]
+  );
+
+  const proceedToConfirmation = async () => {
+    setShippingError("");
+
+    if (shippingMethod === "delivery") {
+      if (!isDeliveryFormValid) {
+        setShippingError("Completá todos los campos marcados con * para continuar.");
+        return;
+      }
+
+      try {
+        setIsAddressSaving(true);
+        const savedAddress = await saveUserAddress(addressForm);
+        if (savedAddress) {
+          setAddressForm((prev) => ({ ...prev, ...savedAddress }));
+        }
+      } catch (err) {
+        setShippingError(err?.message ?? "No pudimos guardar la dirección");
+        return;
+      } finally {
+        setIsAddressSaving(false);
+      }
+    }
+
+    setActiveStep(1);
+  };
+
   const handleCheckout = async () => {
-    if (cartItems.length === 0) return;
+    if (cartItems.length === 0 || activeStep !== 1) return;
 
     setCheckoutState({ status: "loading", message: "Procesando tu compra..." });
     setIsProcessingCheckout(true);
 
     try {
-      const payload = await checkoutCart();
+      const payload = await checkoutCart({ shippingMethod });
       const donationCount = payload?.order?.donationCount ?? 0;
 
       setCheckoutState({
@@ -106,10 +190,29 @@ function Cart() {
       });
 
       await loadCart();
+      setActiveStep(0);
     } catch (err) {
       setCheckoutState({ status: "error", message: err?.message || "No pudimos completar el checkout" });
     } finally {
       setIsProcessingCheckout(false);
+    }
+  };
+
+  const handlePrimaryAction = async () => {
+    if (cartItems.length === 0) return;
+    if (activeStep === 0) {
+      await proceedToConfirmation();
+      return;
+    }
+
+    await handleCheckout();
+  };
+
+  const handleShippingMethodChange = (method) => {
+    setShippingMethod(method);
+    setShippingError("");
+    if (activeStep === 1) {
+      setActiveStep(0);
     }
   };
 
@@ -132,8 +235,23 @@ function Cart() {
 
   const subtotal = calculateSubtotal();
   const donations = calculateDonations();
-  const shipping = subtotal > 50 ? 0 : 5.0;
-  const total = subtotal + shipping;
+  const shippingCost = shippingMethod === "delivery" ? DELIVERY_COST : 0;
+  const total = subtotal + shippingCost;
+
+  const primaryButtonLabel =
+    activeStep === 0
+      ? isAddressSaving
+        ? "Guardando..."
+        : "Continuar con confirmación"
+      : isProcessingCheckout
+        ? "Procesando..."
+        : "Confirmar y pagar";
+
+  const primaryButtonDisabled =
+    cartItems.length === 0 ||
+    isProcessingCheckout ||
+    (activeStep === 0 && shippingMethod === "delivery" && !isDeliveryFormValid) ||
+    isAddressSaving;
 
   return (
     <div className="cart-container">
@@ -237,6 +355,211 @@ function Cart() {
             <div className="cart-summary">
               <h2 className="summary-title">Resumen</h2>
 
+              <div className="checkout-steps">
+                {CHECKOUT_STEPS.map((label, index) => {
+                  const isCompleted = activeStep > index;
+                  const isActive = activeStep === index;
+                  return (
+                    <div
+                      key={label}
+                      className={`checkout-step ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""}`}
+                    >
+                      <div className="step-circle">{index + 1}</div>
+                      <span className="step-label">{label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {activeStep === 0 ? (
+                <div className="shipping-step">
+                  <p className="step-note">Elegí cómo querés recibir tus productos.</p>
+                  <div className="shipping-methods">
+                    <button
+                      type="button"
+                      className={`shipping-method ${shippingMethod === "delivery" ? "active" : ""}`}
+                      onClick={() => handleShippingMethodChange("delivery")}
+                    >
+                      <div className="method-header">
+                        <h3>Envío a domicilio</h3>
+                        <span className="shipping-badge">${DELIVERY_COST} fijos</span>
+                      </div>
+                      <p>Entrega en cualquier punto de Uruguay.</p>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`shipping-method ${shippingMethod === "pickup" ? "active" : ""}`}
+                      onClick={() => handleShippingMethodChange("pickup")}
+                    >
+                      <div className="method-header">
+                        <h3>Retiro en refugio</h3>
+                        <span className="shipping-badge free">Gratis</span>
+                      </div>
+                      <p>Coordinamos el retiro en el refugio más cercano.</p>
+                    </button>
+                  </div>
+
+                  {shippingMethod === "delivery" && (
+                    <div className="shipping-form">
+                      {isAddressLoading ? (
+                        <p className="shipping-loading">Cargando tu dirección guardada...</p>
+                      ) : (
+                        <div className="form-grid">
+                          <label className="form-field">
+                            <span>Nombre completo *</span>
+                            <input
+                              type="text"
+                              value={addressForm.fullName}
+                              onChange={(e) =>
+                                setAddressForm((prev) => ({
+                                  ...prev,
+                                  fullName: e.target.value,
+                                }))
+                              }
+                              placeholder="Nombre y apellido"
+                              autoComplete="name"
+                            />
+                          </label>
+                          <label className="form-field">
+                            <span>Teléfono *</span>
+                            <input
+                              type="tel"
+                              value={addressForm.phone}
+                              onChange={(e) =>
+                                setAddressForm((prev) => ({
+                                  ...prev,
+                                  phone: e.target.value,
+                                }))
+                              }
+                              placeholder="09X XXX XXX"
+                              autoComplete="tel"
+                            />
+                          </label>
+                          <label className="form-field full-width">
+                            <span>Calle y número *</span>
+                            <input
+                              type="text"
+                              value={addressForm.street}
+                              onChange={(e) =>
+                                setAddressForm((prev) => ({
+                                  ...prev,
+                                  street: e.target.value,
+                                }))
+                              }
+                              placeholder="Ej. Av. Italia 1234"
+                              autoComplete="address-line1"
+                            />
+                          </label>
+                          <label className="form-field">
+                            <span>Ciudad *</span>
+                            <input
+                              type="text"
+                              value={addressForm.city}
+                              onChange={(e) =>
+                                setAddressForm((prev) => ({
+                                  ...prev,
+                                  city: e.target.value,
+                                }))
+                              }
+                              placeholder="Montevideo"
+                              autoComplete="address-level2"
+                            />
+                          </label>
+                          <label className="form-field">
+                            <span>Departamento *</span>
+                            <input
+                              type="text"
+                              value={addressForm.department}
+                              onChange={(e) =>
+                                setAddressForm((prev) => ({
+                                  ...prev,
+                                  department: e.target.value,
+                                }))
+                              }
+                              placeholder="Montevideo"
+                              autoComplete="address-level1"
+                            />
+                          </label>
+                          <label className="form-field">
+                            <span>Código postal</span>
+                            <input
+                              type="text"
+                              value={addressForm.postalCode}
+                              onChange={(e) =>
+                                setAddressForm((prev) => ({
+                                  ...prev,
+                                  postalCode: e.target.value,
+                                }))
+                              }
+                              placeholder="11300"
+                              autoComplete="postal-code"
+                            />
+                          </label>
+                          <label className="form-field full-width">
+                            <span>Referencia</span>
+                            <textarea
+                              value={addressForm.reference}
+                              onChange={(e) =>
+                                setAddressForm((prev) => ({
+                                  ...prev,
+                                  reference: e.target.value,
+                                }))
+                              }
+                              placeholder="Piso, apartamento o indicaciones adicionales"
+                              rows={3}
+                            />
+                          </label>
+                        </div>
+                      )}
+                      {shippingError && <p className="shipping-error">{shippingError}</p>}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="confirm-step">
+                  <div className="confirm-header">
+                    <h3>Revisá los datos antes de pagar</h3>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      onClick={() => setActiveStep(0)}
+                      disabled={isProcessingCheckout}
+                    >
+                      Editar envío
+                    </button>
+                  </div>
+                  <div className="confirm-preview">
+                    <div className="confirm-row">
+                      <span className="confirm-label">Método</span>
+                      <span className="confirm-value">
+                        {shippingMethod === "delivery"
+                          ? "Envío a domicilio"
+                          : "Retiro en refugio"}
+                      </span>
+                    </div>
+                    {shippingMethod === "delivery" ? (
+                      <div className="address-preview">
+                        <p>
+                          {addressForm.fullName} · {addressForm.phone}
+                        </p>
+                        <p>
+                          {addressForm.street}, {addressForm.city}, {addressForm.department}
+                        </p>
+                        {addressForm.postalCode && <p>CP {addressForm.postalCode}</p>}
+                        {addressForm.reference && (
+                          <p className="reference-note">Referencia: {addressForm.reference}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="pickup-note">
+                        Te enviaremos la dirección y horario del refugio más cercano apenas confirmes tu compra.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {donations > 0 && (
                 <div className="donation-banner">
                   <div className="donation-icon">💝</div>
@@ -260,15 +583,13 @@ function Cart() {
               <div className="summary-line">
                 <span className="summary-label">Envío</span>
                 <span className="summary-value">
-                  {shipping === 0 ? "Gratis" : `$${shipping.toFixed(2)}`}
+                  {shippingCost === 0 ? "Gratis" : `$${shippingCost.toFixed(2)}`}
                 </span>
               </div>
 
-              {shipping > 0 && (
-                <p className="shipping-note">
-                  Envío gratis en compras mayores a $50
-                </p>
-              )}
+              <p className="shipping-note">
+                Envío dentro de Uruguay por ${DELIVERY_COST}. Retiro en refugio sin costo.
+              </p>
 
               <div className="summary-divider"></div>
 
@@ -285,13 +606,19 @@ function Cart() {
 
               <button
                 className="btn-checkout"
-                onClick={handleCheckout}
-                disabled={isProcessingCheckout || cartItems.length === 0}
+                onClick={handlePrimaryAction}
+                disabled={primaryButtonDisabled}
               >
-                {isProcessingCheckout ? "Procesando..." : "Proceder al pago"}
+                {primaryButtonLabel}
               </button>
 
-              <button className="btn-continue">Seguir comprando</button>
+              <button
+                className="btn-continue"
+                type="button"
+                onClick={() => navigate("/productos")}
+              >
+                Seguir comprando
+              </button>
             </div>
           )}
         </div>

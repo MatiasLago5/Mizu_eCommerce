@@ -15,13 +15,14 @@ async function handleResponse(res) {
   return payload;
 }
 
-export async function checkoutCart() {
+export async function checkoutCart(payload = {}) {
   const res = await fetch(`${API_BASE_URL}/orders/checkout`, {
     method: "POST",
     headers: {
       ...authHeaders(),
       "Content-Type": "application/json",
     },
+    body: JSON.stringify(payload),
   });
 
   return handleResponse(res);

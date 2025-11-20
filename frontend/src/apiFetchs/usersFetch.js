@@ -68,6 +68,30 @@ export async function changeUserPassword({ currentPassword, newPassword }) {
   });
 }
 
+export async function fetchUserAddress() {
+  const payload = await authorizedFetch(`/users/address`);
+  return payload?.address || null;
+}
+
+export async function saveUserAddress(address) {
+  if (!address) {
+    throw new Error("La dirección es requerida");
+  }
+
+  const payload = await authorizedFetch(`/users/address`, {
+    method: "PUT",
+    body: JSON.stringify(address),
+  });
+
+  return payload?.address || null;
+}
+
+export async function deleteUserAddress() {
+  return authorizedFetch(`/users/address`, {
+    method: "DELETE",
+  });
+}
+
 export function saveAuthToken(token) {
   if (typeof window !== 'undefined' && token) {
     localStorage.setItem('mizu_token', token);

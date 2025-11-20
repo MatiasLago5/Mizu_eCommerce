@@ -316,6 +316,7 @@
   padding: 2rem;
 }
 
+.modal,
 .modal-content {
   background: white;
   border-radius: 16px;
@@ -340,6 +341,7 @@
   margin: 0;
 }
 
+.close-btn,
 .modal-close {
   background: none;
   border: none;
@@ -350,6 +352,7 @@
   line-height: 1;
 }
 
+.close-btn:hover,
 .modal-close:hover {
   color: #1a1a1a;
 }

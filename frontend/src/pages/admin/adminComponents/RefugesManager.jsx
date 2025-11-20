@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchRefuges, createRefuge, updateRefuge, deleteRefuge } from '../../../apiFetchs/adminFetch';
 
 function RefugesManager() {
@@ -19,9 +19,9 @@ function RefugesManager() {
 
   useEffect(() => {
     loadRefuges();
-  }, []);
+  }, [loadRefuges]);
 
-  const loadRefuges = async () => {
+  const loadRefuges = useCallback(async () => {
     try {
       setIsLoading(true);
       const data = await fetchRefuges();
@@ -32,7 +32,7 @@ function RefugesManager() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -74,7 +74,7 @@ function RefugesManager() {
     }
   };
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setShowModal(false);
     setEditingRefuge(null);
     setFormData({
@@ -86,7 +86,26 @@ function RefugesManager() {
       capacity: '',
       needs: ''
     });
+  }, []);
+
+  const handleOverlayClick = (event) => {
+    if (event.target === event.currentTarget) {
+      handleCloseModal();
+    }
   };
+
+  useEffect(() => {
+    if (!showModal) return undefined;
+
+    const handleEsc = (event) => {
+      if (event.key === 'Escape') {
+        handleCloseModal();
+      }
+    };
+
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [showModal, handleCloseModal]);
 
   if (isLoading) {
     return <div className="loading">Cargando refugios...</div>;
@@ -142,8 +161,14 @@ function RefugesManager() {
       </div>
 
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal">
+        <div className="modal-overlay" onMouseDown={handleOverlayClick}>
+          <div
+            className="modal-content"
+            role="dialog"
+            aria-modal="true"
+            aria-label={editingRefuge ? 'Editar refugio' : 'Crear refugio'}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
             <div className="modal-header">
               <h2>{editingRefuge ? 'Editar Refugio' : 'Nuevo Refugio'}</h2>
               <button 

@@ -30,6 +30,7 @@ const CartItem = require("./CartItem");
 const Order = require("./Order");
 const OrderItem = require("./OrderItem");
 const Refuge = require("./Refuge");
+const UserAddress = require("./UserAddress");
 
 // Inicializar todos los modelos:
 User.initModel(sequelize);
@@ -41,6 +42,7 @@ CartItem.initModel(sequelize);
 Order.initModel(sequelize);
 OrderItem.initModel(sequelize);
 Refuge.initModel(sequelize);
+UserAddress.initModel(sequelize);
 
 // Definir las relaciones entre los modelos:
 Category.hasMany(Subcategory, {
@@ -124,6 +126,20 @@ CartItem.belongsTo(Product, {
   onUpdate: 'CASCADE'
 });
 
+User.hasOne(UserAddress, {
+  foreignKey: 'userId',
+  as: 'shippingAddress',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+
+UserAddress.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+
 // Relaciones de Order
 User.hasMany(Order, {
   foreignKey: 'userId',
@@ -178,4 +194,5 @@ module.exports = {
   Order,
   OrderItem,
   Refuge,
+  UserAddress,
 };

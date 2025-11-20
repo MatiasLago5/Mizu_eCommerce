@@ -2,14 +2,18 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './loginStyles.css';
 import { registerUser, saveAuthToken } from '../../apiFetchs/usersFetch';
+import { useAuth } from '../../context/AuthContext';
 
 function Signup() {
   const navigate = useNavigate();
+  const { refreshUser, setUser } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    address: '',
+    phoneNumber: '',
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -74,6 +78,10 @@ function Signup() {
 
       if (payload.token) {
         saveAuthToken(payload.token);
+        if (payload.user) {
+          setUser(payload.user);
+        }
+        await refreshUser();
       }
 
       navigate('/');

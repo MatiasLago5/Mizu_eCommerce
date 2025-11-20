@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchProducts } from '../../../apiFetchs/productsFetch';
 import { 
   createProduct, 
@@ -26,11 +26,7 @@ function ProductsManager() {
     imageUrl: ''
   });
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
       const [productsData, categoriesData, subcategoriesData] = await Promise.all([
@@ -48,7 +44,11 @@ function ProductsManager() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -117,7 +117,7 @@ function ProductsManager() {
     }
   };
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setShowModal(false);
     setEditingProduct(null);
     setFormData({
@@ -129,7 +129,26 @@ function ProductsManager() {
       subcategoryId: '',
       imageUrl: ''
     });
+  }, []);
+
+  const handleOverlayClick = (event) => {
+    if (event.target === event.currentTarget) {
+      handleCloseModal();
+    }
   };
+
+  useEffect(() => {
+    if (!showModal) return undefined;
+
+    const handleEsc = (event) => {
+      if (event.key === 'Escape') {
+        handleCloseModal();
+      }
+    };
+
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [showModal, handleCloseModal]);
 
   const getFilteredSubcategories = () => {
     return subcategories.filter(sub => String(sub.categoryId) === String(formData.categoryId));
@@ -213,8 +232,14 @@ function ProductsManager() {
       </div>
 
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal">
+        <div className="modal-overlay" onMouseDown={handleOverlayClick}>
+          <div
+            className="modal-content"
+            role="dialog"
+            aria-modal="true"
+            aria-label={editingProduct ? 'Editar producto' : 'Crear producto'}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
             <div className="modal-header">
               <h2>{editingProduct ? 'Editar Producto' : 'Nuevo Producto'}</h2>
               <button 

@@ -1,10 +1,48 @@
-const { sequelize, Cart, CartItem, Order, OrderItem, Product } = require("../models");
+const {
+  sequelize,
+  Cart,
+  CartItem,
+  Order,
+  OrderItem,
+  Product,
+  UserAddress,
+} = require("../models");
+const VALID_SHIPPING_METHODS = ["delivery", "pickup"];
+const SHIPPING_FLAT_COST = 50;
+const REQUIRED_ADDRESS_FIELDS = [
+  "fullName",
+  "phone",
+  "street",
+  "city",
+  "department",
+];
+
+const addressSnapshot = (addressInstance) => {
+  if (!addressInstance) return null;
+  const json = addressInstance.toJSON();
+  return {
+    fullName: json.fullName,
+    phone: json.phone,
+    street: json.street,
+    city: json.city,
+    department: json.department,
+    postalCode: json.postalCode,
+    reference: json.reference,
+    country: json.country,
+  };
+};
 
 async function checkout(req, res) {
   const transaction = await sequelize.transaction();
 
   try {
     const userId = req.user.id;
+    const requestedMethod = (req.body?.shippingMethod || "delivery").toLowerCase();
+
+    if (!VALID_SHIPPING_METHODS.includes(requestedMethod)) {
+      await transaction.rollback();
+      return res.status(400).json({ error: "Método de envío inválido" });
+    }
 
     const cart = await Cart.findOne({
       where: { userId },
@@ -30,6 +68,37 @@ async function checkout(req, res) {
       return res.status(400).json({
         error: "Tu carrito está vacío",
       });
+    }
+
+    let shippingAddress = null;
+    const shippingCost = requestedMethod === "delivery" ? SHIPPING_FLAT_COST : 0;
+
+    if (requestedMethod === "delivery") {
+      const storedAddress = await UserAddress.findOne({
+        where: { userId },
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
+
+      if (!storedAddress) {
+        await transaction.rollback();
+        return res.status(400).json({
+          error: "Necesitamos tu dirección de envío antes de confirmar la compra",
+        });
+      }
+
+      const missingFields = REQUIRED_ADDRESS_FIELDS.filter(
+        (field) => !storedAddress[field]
+      );
+
+      if (missingFields.length) {
+        await transaction.rollback();
+        return res.status(400).json({
+          error: `La dirección guardada está incompleta (${missingFields.join(", ")})`,
+        });
+      }
+
+      shippingAddress = addressSnapshot(storedAddress);
     }
 
     const totals = cart.items.reduce(
@@ -71,9 +140,12 @@ async function checkout(req, res) {
       {
         userId,
         totalItems: totals.totalItems,
-        totalAmount: totals.totalAmount,
+        totalAmount: totals.totalAmount + shippingCost,
         donationCount,
         status: "pagado",
+        shippingMethod: requestedMethod,
+        shippingCost,
+        shippingAddress,
       },
       { transaction }
     );
