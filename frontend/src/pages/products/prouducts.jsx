@@ -203,7 +203,7 @@ function Products({ variant = "all" }) {
             <div className="products-grid">
               {products.map((product) => (
                 <div key={product.id} className="product-card">
-                  <Link to={`/producto/${product.id}`} className="product-link">
+                  <Link to={`/product/${product.id}`} className="product-link">
                     <img
                       src={product.imageUrl || product.images?.[0] || "/placeholder.png"}
                       alt={product.name}

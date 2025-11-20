@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Filter, LogOut, Search, ShoppingCart, User } from "lucide-react";
+import { LogOut, ShoppingCart, User } from "lucide-react";
 import "./navbarStyles.css";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -39,12 +39,6 @@ function NavBar() {
           </Link>
 
           <div className="navbar-actions">
-            <Link to="/filtro" className="nav-icon" title="Filtrar">
-              <Filter size={20} />
-            </Link>
-            <Link to="/buscar" className="nav-icon" title="Buscar">
-              <Search size={20} />
-            </Link>
             <Link to="/carrito" className="nav-icon cart-icon" title="Carrito">
               <ShoppingCart size={20} />
               {cartCount > 0 && (

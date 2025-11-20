@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import "./productDetailStyles.css";
-import { fetchProductById } from "../../apiFetchs/productsFetch";
+import { fetchProductById, fetchProducts } from "../../apiFetchs/productsFetch";
 import { addOrUpdateCartItem } from "../../apiFetchs/cartFetch";
 import { useCart } from "../../context/CartContext";
 
@@ -15,6 +15,8 @@ function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [feedback, setFeedback] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [relatedStatus, setRelatedStatus] = useState({ loading: false, error: null });
 
   useEffect(() => {
     let isActive = true;
@@ -51,6 +53,49 @@ function ProductDetail() {
       isActive = false;
     };
   }, [id]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const categoryId =
+      product?.categoryId ||
+      product?.category?.id ||
+      (typeof product?.category === "object" ? product?.category?.id : null);
+
+    if (!product || !categoryId) {
+      setRelatedProducts([]);
+      setRelatedStatus((prev) => ({ ...prev, loading: false }));
+      return () => {
+        isActive = false;
+      };
+    }
+
+    const loadRelated = async () => {
+      setRelatedStatus({ loading: true, error: null });
+      try {
+        const data = await fetchProducts({ limit: 12, categoryId });
+        if (!isActive) return;
+        const filtered = (Array.isArray(data) ? data : [])
+          .filter((item) => item.id !== product.id)
+          .slice(0, 4);
+        setRelatedProducts(filtered);
+        setRelatedStatus({ loading: false, error: null });
+      } catch (err) {
+        if (!isActive) return;
+        setRelatedProducts([]);
+        setRelatedStatus({
+          loading: false,
+          error: err?.message ?? "No pudimos cargar productos similares",
+        });
+      }
+    };
+
+    loadRelated();
+
+    return () => {
+      isActive = false;
+    };
+  }, [product]);
 
   const gallery = useMemo(() => {
     if (!product) return [];
@@ -235,6 +280,51 @@ function ProductDetail() {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="product-related-section">
+        <div className="related-header">
+          <h2>Productos similares</h2>
+          {categoryName && <p>Más opciones en {categoryName}</p>}
+        </div>
+
+        {relatedStatus.loading ? (
+          <div className="related-status">Buscando sugerencias...</div>
+        ) : relatedStatus.error ? (
+          <div className="related-status related-status-error">
+            {relatedStatus.error}
+          </div>
+        ) : relatedProducts.length === 0 ? (
+          <div className="related-status">No hay productos similares para mostrar.</div>
+        ) : (
+          <div className="related-grid">
+            {relatedProducts.map((item) => {
+              const itemPrice = Number(item.price);
+              const displayPrice = Number.isFinite(itemPrice)
+                ? `$${itemPrice.toFixed(2)}`
+                : item.price;
+              return (
+                <Link
+                  key={item.id}
+                  to={`/product/${item.id}`}
+                  className="related-card"
+                >
+                  <div className="related-image-wrapper">
+                    <img
+                      src={item.imageUrl || "/placeholder.png"}
+                      alt={item.name}
+                    />
+                  </div>
+                  <div className="related-info">
+                    <h3>{item.name}</h3>
+                    <p className="related-price">{displayPrice}</p>
+                    <span className="related-link">Ver detalle →</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

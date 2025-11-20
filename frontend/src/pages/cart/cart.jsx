@@ -47,6 +47,7 @@ function Cart() {
   const [isAddressLoading, setIsAddressLoading] = useState(false);
   const [isAddressSaving, setIsAddressSaving] = useState(false);
   const [shippingError, setShippingError] = useState("");
+  const [orderReceipt, setOrderReceipt] = useState(null);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -179,7 +180,8 @@ function Cart() {
 
     try {
       const payload = await checkoutCart({ shippingMethod });
-      const donationCount = payload?.order?.donationCount ?? 0;
+      const order = payload?.order || null;
+      const donationCount = order?.donationCount ?? 0;
 
       setCheckoutState({
         status: "success",
@@ -188,6 +190,10 @@ function Cart() {
             ? `¡Gracias! Con esta compra se donarán ${donationCount} producto${donationCount === 1 ? "" : "s"}.`
             : "¡Gracias por tu compra!",
       });
+      setOrderReceipt(order);
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
 
       await loadCart();
       setActiveStep(0);
@@ -260,6 +266,32 @@ function Cart() {
           <h1 className="cart-title">Tu Carrito</h1>
           <p className="cart-subtitle">{cartItems.length} productos</p>
         </div>
+
+        {checkoutState.status === "success" && (
+          <div className="checkout-success-card">
+            <div className="success-icon">✅</div>
+            <div className="success-content">
+              <h2>Compra realizada con éxito</h2>
+              <p>{checkoutState.message}</p>
+              {orderReceipt && (
+                <div className="success-details">
+                  <p>
+                    <strong>Pedido:</strong> {orderReceipt.id?.slice(0, 8)} · {orderReceipt.totalItems} artículo(s)
+                  </p>
+                  <p>
+                    <strong>Total:</strong> ${Number(orderReceipt.totalAmount || 0).toFixed(2)}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="success-actions">
+              <button type="button" className="btn-secondary" onClick={() => navigate("/productos")}>
+                Seguir comprando
+              </button>
+              <button type="button" className="btn-primary" onClick={() => navigate("/profile")}>Ver mis pedidos</button>
+            </div>
+          </div>
+        )}
 
         <div className="cart-layout">
           {error && <div className="cart-error">{error}</div>}
