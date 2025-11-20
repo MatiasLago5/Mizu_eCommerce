@@ -1,52 +1,91 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { fetchProducts } from "../../../apiFetchs/productsFetch";
 import "./FeaturedProducts.css";
+
+const formatCurrency = (value) => Number(value || 0).toFixed(2);
 
 const FeaturedProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Datos de ejemplo mientras la API no está lista
-    const fetchProducts = async () => {
+    const loadDiscountedProducts = async () => {
       try {
-        const data = [
-          { id: 1, name: "Jabón Sakura", price: 12.99, image: "https://www.giftsandcare.com/15968-full_default/jabon-de-bano-sakura-tokyo-acca-kappa-150gr.jpg" },
-          { id: 2, name: "Crema Facial Matcha", price: 18.50, image: "https://www.druni.es/media/catalog/product/5/7/5798580.jpg" },
-          { id: 3, name: "Toallitas de Arroz", price: 9.99, image: "https://miradadeangel.com.co/wp-content/uploads/2021/08/toallas-de-arroz-trendy.jpg" },
-          { id: 4, name: "Aceite de Camelia", price: 15.00, image: "https://m.media-amazon.com/images/I/71g9JsbrMRL._SL1500_.jpg" },
-          { id: 5, name: "Tónico de Té Verde", price: 14.50, image: "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/btn/btn99034/l/46.jpg" },
-          { id: 6, name: "Mascarilla de Arroz", price: 11.00, image: "https://m.media-amazon.com/images/I/51qSvl5xkqL._UF1000,1000_QL80_.jpg" },
-        ];
+        setLoading(true);
+        setError(null);
+        const data = await fetchProducts({ limit: 12, discountedOnly: true });
         setProducts(data);
-      } catch (error) {
-        console.error("Error al obtener los productos:", error);
+      } catch (err) {
+        console.error("Error al obtener los productos:", err);
+        setError("No pudimos cargar los productos en oferta.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
+    loadDiscountedProducts();
   }, []);
 
+  const visibleProducts = useMemo(() => products.slice(0, 6), [products]);
+
   if (loading) {
-    return <p className="loading-text">Cargando productos...</p>;
+    return <p className="loading-text">Cargando productos con descuento...</p>;
+  }
+
+  if (error) {
+    return <p className="error-text">{error}</p>;
+  }
+
+  if (!visibleProducts.length) {
+    return (
+      <section className="featured-products">
+        <h2 className="featured-title">Productos en oferta</h2>
+        <p className="empty-text">Pronto tendremos descuentos disponibles.</p>
+      </section>
+    );
   }
 
   return (
     <section className="featured-products">
-      <h2 className="featured-title">Productos destacados</h2>
+      <h2 className="featured-title">Productos con descuento</h2>
       <div className="product-grid">
-        {products.slice(0, 6).map((product) => (
-          <div className="product-card" key={product.id}>
-            <img
-              src={product.image}
-              alt={product.name}
-              className="product-image"
-            />
-            <h3 className="product-name">{product.name}</h3>
-            <p className="product-price">${product.price.toFixed(2)}</p>
-          </div>
-        ))}
+        {visibleProducts.map((product) => {
+          const discountValue = Number(product.discountPercentage) || 0;
+          const hasDiscount = discountValue > 0;
+          const originalPrice = Number(product.price) || 0;
+          const discountedPrice = hasDiscount
+            ? originalPrice * (1 - discountValue / 100)
+            : originalPrice;
+
+          return (
+            <div className="product-card" key={product.id}>
+              {hasDiscount && (
+                <span className="discount-badge">-{Math.round(discountValue)}%</span>
+              )}
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="product-image"
+                loading="lazy"
+              />
+              <h3 className="product-name">{product.name}</h3>
+              <div className="price-info">
+                {hasDiscount && (
+                  <span className="original-price">
+                    ${formatCurrency(originalPrice)}
+                  </span>
+                )}
+                <span className="current-price">
+                  ${formatCurrency(discountedPrice)}
+                </span>
+              </div>
+              {product.description && (
+                <p className="product-description">{product.description}</p>
+              )}
+            </div>
+          );
+        })}
       </div>
     </section>
   );

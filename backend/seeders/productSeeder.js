@@ -912,6 +912,29 @@ const productsData = [
   },
 ];
 
+const DISCOUNTED_PRODUCTS_COUNT = 10;
+const DISCOUNT_OPTIONS = [10, 15, 20, 25, 30];
+
+function applyRandomDiscounts(items) {
+  const target = Math.min(DISCOUNTED_PRODUCTS_COUNT, items.length);
+  const selectedIndexes = new Set();
+
+  while (selectedIndexes.size < target) {
+    selectedIndexes.add(Math.floor(Math.random() * items.length));
+  }
+
+  items.forEach((product, index) => {
+    if (selectedIndexes.has(index)) {
+      const discountIndex = Math.floor(Math.random() * DISCOUNT_OPTIONS.length);
+      product.discountPercentage = DISCOUNT_OPTIONS[discountIndex];
+    } else {
+      product.discountPercentage = 0;
+    }
+  });
+}
+
+applyRandomDiscounts(productsData);
+
 module.exports = async () => {
   await sequelize.transaction(async (transaction) => {
   await Product.destroy({ where: {}, transaction });
@@ -965,6 +988,7 @@ module.exports = async () => {
           stock: product.stock,
           imageUrl: product.imageUrl,
           isActive: true,
+          discountPercentage: product.discountPercentage || 0,
         };
       }),
       { transaction }

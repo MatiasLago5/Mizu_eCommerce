@@ -9,6 +9,7 @@ async function index(req, res) {
       includeCategory, 
       includeSubcategory,
       search,
+      discountedOnly,
       page = 1,
       limit = 50
     } = req.query;
@@ -26,6 +27,9 @@ async function index(req, res) {
         { name: { [Op.like]: `%${search}%` } },
         { description: { [Op.like]: `%${search}%` } }
       ];
+    }
+    if (discountedOnly === 'true') {
+      whereCondition.discountPercentage = { [Op.gt]: 0 };
     }
     
     const includeOptions = [];

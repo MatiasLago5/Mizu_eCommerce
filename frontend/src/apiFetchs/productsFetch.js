@@ -7,6 +7,7 @@ export async function fetchProducts({
   search,
   categoryId,
   subcategoryId,
+  discountedOnly,
 } = {}) {
   const url = new URL(`${API_BASE_URL}/products`);
   url.searchParams.set("limit", limit);
@@ -22,6 +23,9 @@ export async function fetchProducts({
   }
   if (subcategoryId) {
     url.searchParams.set("subcategoryId", subcategoryId);
+  }
+  if (discountedOnly) {
+    url.searchParams.set("discountedOnly", "true");
   }
 
   const res = await fetch(url.toString());
