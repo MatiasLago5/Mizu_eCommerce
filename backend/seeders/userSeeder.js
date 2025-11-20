@@ -14,7 +14,7 @@ module.exports = async () => {
     phone: faker.number.int({ min: 900000000, max: 999999999 }),
   });
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 25; i++) {
     const firstName = faker.person.firstName();
     const lastName = faker.person.lastName();
     users.push({
