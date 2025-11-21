@@ -4,6 +4,8 @@ import "./productsStyles.css";
 import { fetchProducts } from "../../apiFetchs/productsFetch";
 import { fetchCatalogCategories } from "../../apiFetchs/catalogFetch";
 
+const formatCurrency = (value) => Number(value || 0).toFixed(2);
+
 const HEADER_COPY = {
   all: {
     title: "Todos los Productos",
@@ -193,19 +195,52 @@ function Products({ variant = "all" }) {
             <p className="products-status">No encontramos productos con esos criterios.</p>
           ) : (
             <div className="products-grid">
-              {products.map((product) => (
-                <div key={product.id} className="product-card">
-                  <Link to={`/product/${product.id}`} className="product-link">
-                    <img
-                      src={product.imageUrl || product.images?.[0] || "/placeholder.png"}
-                      alt={product.name}
-                      className="product-image"
-                    />
-                    <h2 className="product-name">{product.name}</h2>
-                    <p className="product-price">${Number(product.price).toFixed(2)}</p>
-                  </Link>
-                </div>
-              ))}
+              {products.map((product) => {
+                const discountValue = Number(product.discountPercentage) || 0;
+                const hasDiscount = discountValue > 0;
+                const originalPrice = Number(product.price) || 0;
+                const finalPrice = hasDiscount
+                  ? originalPrice * (1 - discountValue / 100)
+                  : originalPrice;
+
+                return (
+                  <article key={product.id} className="product-card">
+                    <Link to={`/product/${product.id}`} className="product-link">
+                      <div className="product-card-image">
+                        <img
+                          src={product.imageUrl || product.images?.[0] || "/placeholder.png"}
+                          alt={product.name}
+                          className="product-image"
+                          loading="lazy"
+                        />
+                        {hasDiscount && (
+                          <span className="product-card-badge">
+                            -{Math.round(discountValue)}%
+                          </span>
+                        )}
+                      </div>
+                      <div className="product-card-info">
+                        {product?.category?.name && (
+                          <span className="product-card-category">
+                            {product.category.name}
+                          </span>
+                        )}
+                        <h2 className="product-card-name">{product.name}</h2>
+                        <div className="product-card-pricing">
+                          {hasDiscount && (
+                            <span className="product-card-old-price">
+                              ${formatCurrency(originalPrice)}
+                            </span>
+                          )}
+                          <span className="product-card-price">
+                            ${formatCurrency(finalPrice)}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  </article>
+                );
+              })}
             </div>
           )}
         </>

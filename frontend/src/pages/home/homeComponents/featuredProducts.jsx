@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchProducts } from "../../../apiFetchs/productsFetch";
 import "./FeaturedProducts.css";
 
@@ -8,6 +9,15 @@ const FeaturedProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  const handleNavigate = useCallback(
+    (productId) => {
+      navigate(`/product/${productId}`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    },
+    [navigate]
+  );
 
   useEffect(() => {
     const loadDiscountedProducts = async () => {
@@ -49,7 +59,7 @@ const FeaturedProducts = () => {
   return (
     <section className="featured-products">
       <h2 className="featured-title">Productos con descuento</h2>
-      <div className="product-grid">
+      <div className="featured-grid">
         {visibleProducts.map((product) => {
           const discountValue = Number(product.discountPercentage) || 0;
           const hasDiscount = discountValue > 0;
@@ -59,31 +69,50 @@ const FeaturedProducts = () => {
             : originalPrice;
 
           return (
-            <div className="product-card" key={product.id}>
+            <article
+              key={product.id}
+              className="featured-card featured-card--link"
+              role="button"
+              tabIndex={0}
+              aria-label={`Ver ${product.name}`}
+              onClick={() => handleNavigate(product.id)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  handleNavigate(product.id);
+                }
+              }}
+            >
               {hasDiscount && (
-                <span className="discount-badge">-{Math.round(discountValue)}%</span>
+                <span className="featured-discount-badge">
+                  -{Math.round(discountValue)}%
+                </span>
               )}
               <img
                 src={product.imageUrl}
                 alt={product.name}
-                className="product-image"
+                className="featured-image"
                 loading="lazy"
               />
-              <h3 className="product-name">{product.name}</h3>
-              <div className="price-info">
-                {hasDiscount && (
-                  <span className="original-price">
-                    ${formatCurrency(originalPrice)}
+              <div className="featured-info">
+                <h3 className="featured-name" title={product.name}>
+                  {product.name}
+                </h3>
+                <div className="featured-price-info">
+                  {hasDiscount && (
+                    <span className="featured-original-price">
+                      ${formatCurrency(originalPrice)}
+                    </span>
+                  )}
+                  <span className="featured-current-price">
+                    ${formatCurrency(discountedPrice)}
                   </span>
+                </div>
+                {product.description && (
+                  <p className="featured-description">{product.description}</p>
                 )}
-                <span className="current-price">
-                  ${formatCurrency(discountedPrice)}
-                </span>
               </div>
-              {product.description && (
-                <p className="product-description">{product.description}</p>
-              )}
-            </div>
+            </article>
           );
         })}
       </div>

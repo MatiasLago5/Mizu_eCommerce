@@ -227,10 +227,33 @@ function Cart() {
     return Number.isFinite(numeric) ? numeric : 0;
   };
 
+  const getItemPricing = (item) => {
+    const originalPrice = resolvePrice(
+      item.originalPrice,
+      item.product?.price ?? item.price
+    );
+    const finalPrice = resolvePrice(
+      item.finalPrice,
+      item.price ?? originalPrice
+    );
+    const discountPercentage = Number(
+      item.discountPercentage ?? item.product?.discountPercentage ?? 0
+    );
+    const hasDiscount =
+      discountPercentage > 0 && originalPrice > 0 && finalPrice < originalPrice;
+
+    return {
+      originalPrice,
+      finalPrice,
+      discountPercentage: hasDiscount ? discountPercentage : 0,
+      hasDiscount,
+    };
+  };
+
   const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => {
-      const basePrice = resolvePrice(item.price, item.product?.price);
-      return sum + basePrice * item.quantity;
+      const { finalPrice } = getItemPricing(item);
+      return sum + finalPrice * item.quantity;
     }, 0);
   };
 
@@ -258,6 +281,8 @@ function Cart() {
     isProcessingCheckout ||
     (activeStep === 0 && shippingMethod === "delivery" && !isDeliveryFormValid) ||
     isAddressSaving;
+
+  const hasItems = cartItems.length > 0;
 
   return (
     <div className="cart-container">
@@ -288,7 +313,9 @@ function Cart() {
               <button type="button" className="btn-secondary" onClick={() => navigate("/productos")}>
                 Seguir comprando
               </button>
-              <button type="button" className="btn-primary" onClick={() => navigate("/profile")}>Ver mis pedidos</button>
+              <button type="button" className="btn-primary" onClick={() => navigate("/profile")}>
+                Ver mis pedidos
+              </button>
             </div>
           </div>
         )}
@@ -301,89 +328,93 @@ function Cart() {
           ) : null}
 
           <div className="cart-items-section">
-            {cartItems.length === 0 ? (
+            {hasItems ? (
+              <div className="cart-items-list">
+                {cartItems.map((item) => {
+                  const pricing = getItemPricing(item);
+
+                  return (
+                    <div key={item.id} className="cart-item">
+                      <img
+                        src={
+                          item.imageUrl ||
+                          item.product?.imageUrl ||
+                          "/placeholder.png"
+                        }
+                        alt={item.product?.name || item.name || "Producto"}
+                        className="item-image"
+                      />
+
+                      <div className="item-info">
+                        <h3 className="item-name">
+                          {item.product?.name || item.name}
+                        </h3>
+                        <p className="item-description">
+                          {item.product?.description || item.description}
+                        </p>
+                        <div className="item-price-block">
+                          {pricing.hasDiscount && (
+                            <span className="item-price-original">
+                              ${pricing.originalPrice.toFixed(2)}
+                            </span>
+                          )}
+                          <span className="item-price-current">
+                            ${pricing.finalPrice.toFixed(2)}
+                          </span>
+                          {pricing.hasDiscount && (
+                            <span className="item-price-badge">
+                              -{Math.round(pricing.discountPercentage)}%
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="item-actions">
+                        <div className="quantity-control">
+                          <button
+                            className="qty-btn"
+                            onClick={() => updateQuantity(item, -1)}
+                          >
+                            -
+                          </button>
+                          <span className="qty-display">{item.quantity}</span>
+                          <button
+                            className="qty-btn"
+                            onClick={() => updateQuantity(item, 1)}
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        <p className="item-total">
+                          ${ (pricing.finalPrice * item.quantity).toFixed(2) }
+                        </p>
+
+                        <button
+                          className="remove-btn"
+                          onClick={() => removeItem(item.id)}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
               <div className="empty-cart">
                 <div className="empty-icon">🛒</div>
                 <h2 className="empty-title">Tu carrito está vacío</h2>
-                <p className="empty-text">
-                  Agregá productos para comenzar tu compra
-                </p>
+                <p className="empty-text">Agregá productos para comenzar tu compra</p>
 
-                <button
-                  className="btn-shop"
-                  onClick={() => navigate("/productos")}
-                >
+                <button className="btn-shop" onClick={() => navigate("/productos")}>
                   Ir a productos
                 </button>
-              </div>
-            ) : (
-              <div className="cart-items-list">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="cart-item">
-                    <img
-                      src={
-                        item.imageUrl ||
-                        item.product?.imageUrl ||
-                        "/placeholder.png"
-                      }
-                      alt={item.product?.name || item.name || "Producto"}
-                      className="item-image"
-                    />
-
-                    <div className="item-info">
-                      <h3 className="item-name">
-                        {item.product?.name || item.name}
-                      </h3>
-                      <p className="item-description">
-                        {item.product?.description || item.description}
-                      </p>
-                      <p className="item-price">
-                        $
-                        {resolvePrice(item.price, item.product?.price).toFixed(
-                          2
-                        )}
-                      </p>
-                    </div>
-
-                    <div className="item-actions">
-                      <div className="quantity-control">
-                        <button
-                          className="qty-btn"
-                          onClick={() => updateQuantity(item, -1)}
-                        >
-                          -
-                        </button>
-                        <span className="qty-display">{item.quantity}</span>
-                        <button
-                          className="qty-btn"
-                          onClick={() => updateQuantity(item, 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-
-                      <p className="item-total">
-                        $
-                        {(
-                          resolvePrice(item.price, item.product?.price) *
-                          item.quantity
-                        ).toFixed(2)}
-                      </p>
-
-                      <button
-                        className="remove-btn"
-                        onClick={() => removeItem(item.id)}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-                ))}
               </div>
             )}
           </div>
 
-          {cartItems.length > 0 && (
+          {hasItems && (
             <div className="cart-summary">
               <h2 className="summary-title">Resumen</h2>
 

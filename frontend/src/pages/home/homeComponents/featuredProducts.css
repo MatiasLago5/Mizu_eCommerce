@@ -16,14 +16,14 @@
 }
 
 /* Grid de productos */
-.product-grid {
+.featured-products .featured-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.5rem;
 }
 
 /* Cada card de producto */
-.product-card {
+.featured-products .featured-card {
   background: white;
   border-radius: 15px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -33,14 +33,23 @@
   overflow: visible;
 }
 
+.featured-products .featured-card--link {
+  cursor: pointer;
+  outline: none;
+}
+
+.featured-products .featured-card--link:focus-visible {
+  box-shadow: 0 0 0 3px rgba(13, 59, 102, 0.3);
+}
+
 /* Efecto hover */
-.product-card:hover {
+.featured-products .featured-card:hover {
   transform: translateY(-6px) scale(1.02);
   box-shadow: 0 6px 20px rgba(13, 59, 102, 0.2); /* azul para hover */
 }
 
 /* Imagen del producto */
-.product-image {
+.featured-products .featured-image {
   width: 100%;
   height: 200px;
   object-fit: contain;
@@ -49,21 +58,25 @@
 }
 
 /* Nombre del producto */
-.product-name {
+.featured-products .featured-name {
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0.3rem 0;
   color: #0d3b66; /* azul profundo */
+  text-align: center;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Precio del producto */
-.product-price {
-  font-size: 1rem;
-  color: #1a73e8; /* azul suave estilo agua */
-  font-weight: 500;
+.featured-products .featured-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
 }
-
-.price-info {
+.featured-products .featured-price-info {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
@@ -71,24 +84,24 @@
   margin-bottom: 0.6rem;
 }
 
-.original-price {
+.featured-products .featured-original-price {
   color: #8f9cae;
   text-decoration: line-through;
   font-size: 0.95rem;
 }
 
-.current-price {
+.featured-products .featured-current-price {
   font-size: 1.2rem;
   color: #0d3b66;
   font-weight: 600;
 }
 
-.product-description {
+.featured-products .featured-description {
   font-size: 0.9rem;
   color: #4a4a4a;
 }
 
-.discount-badge {
+.featured-products .featured-discount-badge {
   position: absolute;
   top: 10px;
   right: 10px;

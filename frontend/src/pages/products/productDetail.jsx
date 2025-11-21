@@ -5,6 +5,8 @@ import { fetchProductById, fetchProducts } from "../../apiFetchs/productsFetch";
 import { addOrUpdateCartItem } from "../../apiFetchs/cartFetch";
 import { useCart } from "../../context/CartProvider";
 
+const formatCurrency = (value) => Number(value || 0).toFixed(2);
+
 function ProductDetail() {
   const { id } = useParams();
   const { refreshCart } = useCart();
@@ -124,6 +126,16 @@ function ProductDetail() {
     return Number.isFinite(numeric) ? numeric : null;
   }, [product]);
 
+  const discountValue = useMemo(() => {
+    const numeric = Number(product?.discountPercentage ?? 0);
+    return Number.isFinite(numeric) ? numeric : 0;
+  }, [product]);
+
+  const hasDiscount = priceNumber !== null && discountValue > 0;
+  const discountedPrice = hasDiscount
+    ? priceNumber * (1 - discountValue / 100)
+    : priceNumber;
+
   const handleQuantityChange = (delta) => {
     const next = quantity + delta;
     if (next < 1) return;
@@ -218,9 +230,21 @@ function ProductDetail() {
           )}
           <h1 className="product-name">{product?.name}</h1>
           <div className="product-price">
-            {priceNumber !== null
-              ? `$${priceNumber.toFixed(2)}`
-              : product?.price}
+            {hasDiscount && priceNumber !== null && (
+              <>
+                <span className="product-price-original">
+                  ${priceNumber.toFixed(2)}
+                </span>
+                <span className="product-price-badge">
+                  -{Math.round(discountValue)}%
+                </span>
+              </>
+            )}
+            <span className="product-price-final">
+              {discountedPrice !== null
+                ? `$${formatCurrency(discountedPrice)}`
+                : product?.price}
+            </span>
           </div>
 
           {product?.description && (
@@ -300,9 +324,11 @@ function ProductDetail() {
           <div className="related-grid">
             {relatedProducts.map((item) => {
               const itemPrice = Number(item.price);
-              const displayPrice = Number.isFinite(itemPrice)
-                ? `$${itemPrice.toFixed(2)}`
-                : item.price;
+              const discount = Number(item.discountPercentage || 0);
+              const hasItemDiscount = Number.isFinite(itemPrice) && discount > 0;
+              const finalItemPrice = hasItemDiscount
+                ? itemPrice * (1 - discount / 100)
+                : itemPrice;
               return (
                 <Link
                   key={item.id}
@@ -317,7 +343,23 @@ function ProductDetail() {
                   </div>
                   <div className="related-info">
                     <h3>{item.name}</h3>
-                    <p className="related-price">{displayPrice}</p>
+                    <div className="related-price-info">
+                      {hasItemDiscount && (
+                        <span className="related-old-price">
+                          ${formatCurrency(itemPrice)}
+                        </span>
+                      )}
+                      <span className="related-price">
+                        {Number.isFinite(finalItemPrice)
+                          ? `$${formatCurrency(finalItemPrice)}`
+                          : item.price}
+                      </span>
+                      {hasItemDiscount && (
+                        <span className="related-badge">
+                          -{Math.round(discount)}%
+                        </span>
+                      )}
+                    </div>
                     <span className="related-link">Ver detalle →</span>
                   </div>
                 </Link>

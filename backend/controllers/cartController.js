@@ -1,5 +1,66 @@
 const { Cart, CartItem, Product } = require("../models");
 
+const toCurrency = (value) => {
+  const numeric = Number.parseFloat(value ?? 0);
+  return Number.isFinite(numeric) ? Number(numeric.toFixed(2)) : 0;
+};
+
+function calculateDiscountedPrice(product) {
+  const basePrice = toCurrency(product?.price ?? 0);
+  if (basePrice <= 0) {
+    return 0;
+  }
+
+  const discount = Number(product?.discountPercentage ?? 0);
+  if (discount > 0) {
+    const discounted = basePrice * (1 - discount / 100);
+    return toCurrency(discounted);
+  }
+
+  return basePrice;
+}
+
+function buildCartItemPayload(cartItem) {
+  if (!cartItem) return null;
+
+  const raw = typeof cartItem.toJSON === "function" ? cartItem.toJSON() : { ...cartItem };
+  const product = raw.product || cartItem.product || null;
+
+  const originalPrice = toCurrency(product?.price ?? raw.originalPrice ?? raw.price ?? 0);
+  const finalPrice = toCurrency(raw.price ?? originalPrice);
+  const discountPercentage = Number(product?.discountPercentage ?? raw.discountPercentage ?? 0);
+  const hasDiscount = discountPercentage > 0 && originalPrice > 0 && finalPrice <= originalPrice;
+
+  return {
+    ...raw,
+    price: finalPrice,
+    originalPrice,
+    finalPrice,
+    discountPercentage: hasDiscount ? discountPercentage : 0,
+    hasDiscount,
+  };
+}
+
+async function syncCartItemPrices(cart) {
+  if (!cart?.items?.length) {
+    return;
+  }
+
+  await Promise.all(
+    cart.items.map(async (item) => {
+      if (!item.product) return;
+
+      const finalPrice = calculateDiscountedPrice(item.product);
+      const storedPrice = parseFloat(item.price);
+
+      if (!Number.isFinite(storedPrice) || storedPrice !== finalPrice) {
+        item.price = finalPrice;
+        await item.save();
+      }
+    })
+  );
+}
+
 async function getCart(req, res) {
   try {
     const userId = req.user.id;
@@ -14,7 +75,7 @@ async function getCart(req, res) {
             {
               model: Product,
               as: 'product',
-              attributes: ['id', 'name', 'imageUrl', 'stock', 'isActive'],
+              attributes: ['id', 'name', 'imageUrl', 'stock', 'isActive', 'price', 'discountPercentage'],
             },
           ],
         },
@@ -26,13 +87,18 @@ async function getCart(req, res) {
       cart.items = [];
     }
 
+    await syncCartItemPrices(cart);
+
     const total = await cart.getTotal();
     const itemCount = await cart.getItemCount();
+
+    const cartJson = cart.toJSON();
+    cartJson.items = (cart.items || []).map((item) => buildCartItemPayload(item));
 
     res.json({
       message: "Carrito obtenido exitosamente",
       data: {
-        ...cart.toJSON(),
+        ...cartJson,
         total,
         itemCount,
       },
@@ -93,6 +159,8 @@ async function addItem(req, res) {
       },
     });
 
+    const finalPrice = calculateDiscountedPrice(product);
+
     if (cartItem) {
       const newQuantity = cartItem.quantity + quantity;
       
@@ -103,13 +171,14 @@ async function addItem(req, res) {
       }
 
       cartItem.quantity = newQuantity;
+      cartItem.price = finalPrice;
       await cartItem.save();
     } else {
       cartItem = await CartItem.create({
         cartId: cart.id,
         productId,
         quantity,
-        price: product.price,
+        price: finalPrice,
       });
     }
 
@@ -118,14 +187,14 @@ async function addItem(req, res) {
         {
           model: Product,
           as: 'product',
-          attributes: ['id', 'name', 'imageUrl', 'stock', 'isActive'],
+          attributes: ['id', 'name', 'imageUrl', 'stock', 'isActive', 'price', 'discountPercentage'],
         },
       ],
     });
 
     res.status(201).json({
       message: "Producto agregado al carrito exitosamente",
-      data: updatedItem,
+      data: buildCartItemPayload(updatedItem),
     });
   } catch (error) {
     console.error('Error en addItem:', error);
@@ -179,12 +248,15 @@ async function updateItem(req, res) {
       });
     }
 
+    const finalPrice = calculateDiscountedPrice(cartItem.product);
+
     cartItem.quantity = quantity;
+    cartItem.price = finalPrice;
     await cartItem.save();
 
     res.json({
       message: "Cantidad actualizada exitosamente",
-      data: cartItem,
+      data: buildCartItemPayload(cartItem),
     });
   } catch (error) {
     console.error('Error en updateItem:', error);
