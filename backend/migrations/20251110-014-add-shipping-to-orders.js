@@ -24,12 +24,5 @@ module.exports = {
     await queryInterface.removeColumn("Orders", "shippingAddress");
     await queryInterface.removeColumn("Orders", "shippingCost");
     await queryInterface.removeColumn("Orders", "shippingMethod");
-
-    const dialect = queryInterface.sequelize.getDialect();
-    if (dialect === "postgres") {
-      await queryInterface.sequelize.query(
-        'DROP TYPE IF EXISTS "enum_Orders_shippingMethod";'
-      );
-    }
   },
 };

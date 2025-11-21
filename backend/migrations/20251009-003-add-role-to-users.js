@@ -11,12 +11,5 @@ module.exports = {
 
   async down(queryInterface) {
     await queryInterface.removeColumn("Users", "role");
-
-    const dialect = queryInterface.sequelize.getDialect();
-    if (dialect === "postgres") {
-      await queryInterface.sequelize.query(
-        'DROP TYPE IF EXISTS "enum_Users_role";'
-      );
-    }
   },
 };

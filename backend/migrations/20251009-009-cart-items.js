@@ -50,8 +50,6 @@ module.exports = {
         defaultValue: Sequelize.NOW,
       },
     });
-
-    // Índice único para evitar duplicados de producto en el mismo carrito
     await queryInterface.addIndex('CartItems', ['cartId', 'productId'], {
       unique: true,
       name: 'cart_product_unique',
