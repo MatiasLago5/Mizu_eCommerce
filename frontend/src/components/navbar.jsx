@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { LogOut, ShoppingCart, User } from "lucide-react";
 import "./navbarStyles.css";
-import { useAuth } from "../context/AuthContext";
-import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthProvider";
+import { useCart } from "../context/CartProvider";
 
 function NavBar() {
   const navigate = useNavigate();

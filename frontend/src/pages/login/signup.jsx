@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './loginStyles.css';
 import { registerUser, saveAuthToken } from '../../apiFetchs/usersFetch';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthProvider';
 
 function Signup() {
   const navigate = useNavigate();
-  const { refreshUser, setUser } = useAuth();
+  const { refreshUser, setUser, isAuthenticated, isLoading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,6 +17,12 @@ function Signup() {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -93,6 +99,20 @@ function Signup() {
     }
 
   };
+
+  if (authLoading) {
+    return (
+      <div className="login-container">
+        <div className="login-card">
+          <p className="login-subtitle">Preparando tu experiencia...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="login-container">

@@ -9,14 +9,6 @@ const HEADER_COPY = {
     title: "Todos los Productos",
     subtitle: "Descubrí nuestra colección completa de productos conscientes",
   },
-  search: {
-    title: "Buscar productos",
-    subtitle: "Ingresá el nombre o palabras clave para encontrar tu producto ideal",
-  },
-  filter: {
-    title: "Filtrar catálogo",
-    subtitle: "Combiná filtros por categoría y subcategoría para acotar tu búsqueda",
-  },
 };
 
 function Products({ variant = "all" }) {

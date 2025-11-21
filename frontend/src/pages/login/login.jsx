@@ -1,18 +1,24 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './loginStyles.css';
 import { loginUser, saveAuthToken } from '../../apiFetchs/usersFetch';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthProvider';
 
 function Login() {
   const navigate = useNavigate();
-  const { refreshUser } = useAuth();
+  const { refreshUser, isAuthenticated, isLoading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -74,6 +80,20 @@ function Login() {
       setIsLoading(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="login-container">
+        <div className="login-card">
+          <p className="login-subtitle">Validando tu sesión...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="login-container">

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { changeUserPassword } from '../../../apiFetchs/usersFetch';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../context/AuthProvider';
 
 function SecuritySettings() {
   const navigate = useNavigate();

@@ -4,7 +4,7 @@ import PersonalInfo from './profileComponents/personalInfo';
 import OrdersList from './profileComponents/ordersList';
 import AddressesList from './profileComponents/adressesList';
 import SecuritySettings from './profileComponents/securitySettings';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthProvider';
 import { fetchMyOrders } from '../../apiFetchs/ordersFetch';
 
 function Profile() {

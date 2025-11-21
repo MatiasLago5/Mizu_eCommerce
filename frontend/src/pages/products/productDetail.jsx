@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import "./productDetailStyles.css";
 import { fetchProductById, fetchProducts } from "../../apiFetchs/productsFetch";
 import { addOrUpdateCartItem } from "../../apiFetchs/cartFetch";
-import { useCart } from "../../context/CartContext";
+import { useCart } from "../../context/CartProvider";
 
 function ProductDetail() {
   const { id } = useParams();
