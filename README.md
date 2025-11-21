@@ -1,4 +1,4 @@
-La idea de este proyecto es crear una página Fullstack. La aplicación utiliza como base de datos MySQL, y está construido con sequelize.
+Esta página es un proyecto integrador Fullstack. La aplicación utiliza como base de datos MySQL, y está construido con sequelize.
 
 Las tablas se generan con migraciones (se encuentran en la carpeta "migrations"); las migraciones son archivos .js con "timestamps"(AÑO/MES/DIA) al comienzo y un orden jerárquico numérico a continuación. Tal que (20251009-001-user.js) es un archivo, y (20251009-002-products-categories.js) es otro. Este archivo, al ser ejecutado, crea las tablas pendientes en el proyecto.
 
